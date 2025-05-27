@@ -1,0 +1,4 @@
+detect edges to get a focus on actual shapes
+separate each shape into differents images
+applicate CNN to detect if cristal
+deduce its size, caracteristics if cristal
