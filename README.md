@@ -4,7 +4,7 @@ AI-Driven Measurement of Protein Crystals on Microfluidic Chips
 
 # Installation
 
-If you are on Linux or MacOS you can simply run
+If you are on Linux or MacOS you can simply run:
 
 ```bash
 ./install.sh
