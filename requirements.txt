@@ -2,4 +2,8 @@ opencv-python
 pytesseract
 numpy
 tesseract
+
+# Pour utiliser labelme
 labelme
+setuptools
+
