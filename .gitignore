@@ -1,4 +1,7 @@
 env
 crystal_images_filip
 Yenway*
-database_build/images
+database_build/jsons
+database_build/single_masks
+database_build/multi_masks
+database_build/images/*

@@ -10,6 +10,8 @@ def main(dossier_source, dossier_destination):
 
     # S'assurer que le dossier de destination existe
     os.makedirs(dossier_destination, exist_ok=True)
+    
+    i = 0
 
     # Parcours des fichiers dans le dossier source
     for nom_fichier in os.listdir(dossier_source):
@@ -18,6 +20,9 @@ def main(dossier_source, dossier_destination):
             chemin_destination = os.path.join(dossier_destination, nom_fichier)
             shutil.move(chemin_source, chemin_destination)
             print(f"Déplacé : {nom_fichier}")
+            i+=1
+            
+    print(f"\n{i} fichiers déplacés !")
         
 # Exemple d'utilisation
 if __name__ == "__main__":

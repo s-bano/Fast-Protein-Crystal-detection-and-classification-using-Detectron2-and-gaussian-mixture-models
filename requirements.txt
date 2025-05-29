@@ -3,7 +3,7 @@ pytesseract
 numpy
 tesseract
 
-# Pour utiliser labelme
+# Pour labeliser des images
 labelme
 setuptools
 
