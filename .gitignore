@@ -5,3 +5,5 @@ database_build/jsons
 database_build/single_masks
 database_build/multi_masks
 database_build/images/*
+r-cnn_dataset*
+u-net_dataset*

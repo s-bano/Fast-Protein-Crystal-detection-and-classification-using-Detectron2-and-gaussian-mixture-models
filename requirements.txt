@@ -2,6 +2,9 @@ opencv-python
 pytesseract
 numpy
 tesseract
+torch
+pillow
+torchvision
 
 # Pour labeliser des images
 labelme
