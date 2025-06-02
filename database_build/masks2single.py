@@ -35,6 +35,6 @@ def combine_instance_masks_to_binary_mask(input_root, output_dir):
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
-        print("Usage: python script.py input_folder output_folder")
+        print("Usage: python masks2single.py input_folder output_folder")
     else:
         combine_instance_masks_to_binary_mask(sys.argv[1], sys.argv[2])

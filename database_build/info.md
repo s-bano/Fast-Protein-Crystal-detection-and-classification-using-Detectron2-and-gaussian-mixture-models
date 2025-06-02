@@ -2,6 +2,33 @@
 
 1013 images dans la base de données
 
+## 0. Usage
+
+Lancer `labelme` pour dessiner chaque cristal de chaque image du dossier `images`
+
+```bash
+labelme
+```
+
+Générer les 2 dossiers differents de masques pour les 2 usages (U-Net et R-CNN) qui n'ont pas les memes besoins
+
+```bash
+python json2masks.py jsons images multi_masks
+python masks2single.py multi_masks single_masks
+```
+
+Générer le fichier `annotations.json` nécéssaire pour les reseau de neruones de type R-CNN
+
+Convertir les dossiers générés en archives incluants toutes les donnees pour chaque type de dataset
+
+```bash
+python build_u-net_dataset.py images_folder single_masks_folder
+python build r-cnn_dataset.py images_folder multi_masks_folder
+```
+
+A venir:
+Un fichier `build_datasets.sh` qui compilera toutes ces etapes en une commande avec des options
+
 ## 📦 1. Base de données pour U-Net (Segmentation sémantique)
 
 ✅ À faire :
@@ -24,6 +51,13 @@ u-net_dataset/
 ```
 
 ✅ Utilisable directement avec U-Net (Keras, PyTorch, etc.).
+
+📁 Procédure :
+
+```bash
+python json2masks.py jsons images multi_masks
+python masks2single.py multi_masks single_masks
+```
 
 ⸻
 
