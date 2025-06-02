@@ -38,10 +38,11 @@ sudo apt install tesseract-ocr
 ### Windows
 
 Download the installation program on : https://github.com/tesseract-ocr/tesseract
-⚠️ Make sure tesseract in in your PATH.
+⚠️ Make sure tesseract is in your PATH.
 
 ## 2. Python Dependencies
 
-```bash
+````bash
 pip install -r requirements.txt
-```
+``` 
+````
