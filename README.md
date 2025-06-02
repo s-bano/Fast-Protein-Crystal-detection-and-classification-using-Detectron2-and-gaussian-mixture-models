@@ -42,7 +42,6 @@ Download the installation program on : https://github.com/tesseract-ocr/tesserac
 
 ## 2. Python Dependencies
 
-````bash
+```bash
 pip install -r requirements.txt
-``` 
-````
+```
