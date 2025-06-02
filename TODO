@@ -1,0 +1,26 @@
+# ✅ TODO List for AI-CrystalMetrics
+
+---
+
+## 📁 Dataset Building
+
+- [ ] Finish annotate images using LabelMe
+- [ ] Generate `annotations.json` for Mask R-CNN (COCO format)
+
+---
+
+## 🧠 AI / Model Training
+
+### U-Net
+
+- [ ] To start
+
+### Mask R-CNN
+
+- [ ] To start
+
+---
+
+## Documentation
+
+- [ ] Translate every info in english
