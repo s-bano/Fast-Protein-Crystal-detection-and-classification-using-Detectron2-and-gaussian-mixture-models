@@ -10,6 +10,18 @@ Lancer `labelme` pour dessiner chaque cristal de chaque image du dossier `images
 labelme
 ```
 
+### 1. Procédure automatisé
+
+Make sure you're positionned in `database_build` folder then run:
+
+```bash
+./build_database.sh -u     # -u pour une base de donneés adpatée au U-Net
+./build_database.sh -r     # -r pour une base de donnés adaptée au R-CNN
+./build_database.sh -a     # Pour générer les 2
+```
+
+### 2. Procédure manuelle
+
 Générer les 2 dossiers differents de masques pour les 2 usages (U-Net et R-CNN) qui n'ont pas les memes besoins
 
 ```bash
@@ -25,9 +37,6 @@ Convertir les dossiers générés en archives incluants toutes les donnees pour 
 python build_u-net_dataset.py images_folder single_masks_folder
 python build r-cnn_dataset.py images_folder multi_masks_folder
 ```
-
-A venir:
-Un fichier `build_datasets.sh` qui compilera toutes ces etapes en une commande avec des options
 
 ## 📦 1. Base de données pour U-Net (Segmentation sémantique)
 
