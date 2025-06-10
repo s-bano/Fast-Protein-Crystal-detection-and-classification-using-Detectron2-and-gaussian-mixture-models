@@ -10,3 +10,5 @@ torchvision
 labelme
 setuptools
 
+# Optionnel: Pour visualiser le model
+netron

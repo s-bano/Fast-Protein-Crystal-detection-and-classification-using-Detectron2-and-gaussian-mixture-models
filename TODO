@@ -2,6 +2,15 @@
 
 ---
 
+## Shape Detection
+
+First approach to detect cristal
+
+- [x] First try with python libraries
+- [x] Simple algorithms to filtrate the false positives detcted by the model
+
+---
+
 ## 📁 Dataset Building
 
 - [ ] Finish annotate images using LabelMe
@@ -13,11 +22,13 @@
 
 ### U-Net
 
-- [ ] To start
+- [ ] From Scratch
+- [ ] Res-NEt ?
 
 ### Mask R-CNN
 
-- [ ] To start
+- [ ] Matterport Mask R-CNN (Pretrained)
+- [ ] From Scratch ?
 
 ---
 
