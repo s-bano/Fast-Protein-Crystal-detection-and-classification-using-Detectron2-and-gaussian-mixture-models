@@ -10,5 +10,11 @@ torchvision
 labelme
 setuptools
 
+# Moksh
+streamlit
+seatron
+ultralytics
+sahi
+
 # Optionnel: Pour visualiser le model
 netron
