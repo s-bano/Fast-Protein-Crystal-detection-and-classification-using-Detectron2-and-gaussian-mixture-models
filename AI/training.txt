@@ -1,0 +1,7 @@
+Model Training
+
+This model was trained on Google Colab.
+
+For details and the training code, please see:
+
+https://colab.research.google.com/drive/1rT1KiuuAUJRoLP7uuSWK1Gn8fQK7E0-4?usp=sharing

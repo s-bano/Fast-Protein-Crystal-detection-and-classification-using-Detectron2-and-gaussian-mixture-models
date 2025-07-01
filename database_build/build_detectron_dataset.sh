@@ -46,6 +46,8 @@ done
 
 echo "Dataset construit dans $OUTPUT_DIR avec $train_count images dans train et $((total - train_count)) dans val."
 
+# Création des fichiers annotations.json au format coco
+
 echo "Creation du fichier coco pour la base d'entrainement..."
 python labelme2coco.py $1 $OUTPUT_DIR/train $OUTPUT_DIR/train/annotations.json --category crystal
 echo "Fichier coco d'entrainement cree avec succes!"
@@ -53,3 +55,8 @@ echo "Fichier coco d'entrainement cree avec succes!"
 echo "Creation du fichier coco pour la base de validation..."
 python labelme2coco.py $1 $OUTPUT_DIR/val $OUTPUT_DIR/val/annotations.json --category crystal
 echo "Fichier coco de validation cree avec succes!"
+
+# Compression au format zip
+echo "Compression du dataset en cours..."
+zip -r "${OUTPUT_DIR}.zip" "$OUTPUT_DIR"
+echo "Compression terminée : ${OUTPUT_DIR}.zip"
