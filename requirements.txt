@@ -15,6 +15,7 @@ streamlit
 seatron
 ultralytics
 sahi
+openpyxl
 
 # Optionnel: Pour visualiser le model
 netron
