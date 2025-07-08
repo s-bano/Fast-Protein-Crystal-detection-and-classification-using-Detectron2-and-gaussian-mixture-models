@@ -2,36 +2,53 @@
 
 ---
 
-## Shape Detection
-
-First approach to detect cristal
-
-- [x] First try with python libraries
-- [x] Simple algorithms to filtrate the false positives detcted by the model
-
----
-
 ## 📁 Dataset Building
 
 - [ ] Finish annotate images using LabelMe
-- [ ] Generate `annotations.json` for Mask R-CNN (COCO format)
+- [x] Generate `annotations.json` for Mask R-CNN (COCO format)
 
 ---
 
-## 🧠 AI / Model Training
+## 🧠 AI / Model Training with Mask R-CNN (Detectron2)
 
-### U-Net
+### Model design
 
-- [ ] From Scratch
-- [ ] Res-NEt ?
+- [ ] Better gestion of pack of cristals
 
-### Mask R-CNN
+### Tests:
 
-- [ ] Matterport Mask R-CNN (Pretrained)
-- [ ] From Scratch ?
+- [x] Create a test procedure that calculate the accuracy of the model
+
+### Deployment
+
+- [ ] Export detectron2 model to a pytorch model
+- [ ] Preprocess: Image transformation and transfornation infos saving (Test on Google colab)
+- [ ] Postprocessing: Filtering false positive and reverse transformation off preprocessed images
+- [ ] Simplification of the processing to deploy
 
 ---
 
 ## Documentation
 
-- [x] Translate every info in english
+- [ ] Translate every info in english
+
+---
+
+## Relase 1.0
+
+The first release of this project must include:
+
+- [ ] Database_build: Necessary files and doc to build a dataset with annotations.json directly compatible with a detectron2 training on google colab
+- [ ] Database_build: An already existing dataset with annotations.json (currently 245 images) but without an odd number
+- [ ] AI: model.pt
+- [ ] AI: Every files necessary to perform a segmentation (preprocess and postprocess included) using the pytorch model
+- [ ] Doc: Clear documentation on how to use and how it works
+
+---
+
+## Shape Detection (outdated)
+
+First approach to detect cristal now made better by detectron2
+
+- [x] First try with python libraries
+- [x] Simple algorithms to filtrate the false positives detcted by the model

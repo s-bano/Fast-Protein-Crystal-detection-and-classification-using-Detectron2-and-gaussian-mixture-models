@@ -15,3 +15,5 @@ missing\ resolved\ crystal\ images
 crystal_unresolved
 *.zip
 database_build/test_detectron_dataset
+AI/images_output
+AI/model_final.pth
