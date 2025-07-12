@@ -1,55 +1,83 @@
-'''
-outputs = predictor(img)
-outputs = filter_false_positives(img, outputs, score_thresh=0.80, area_thresh_ratio=0.3, black_thresh_ratio=0.5)
-'''
+"""
+Postprocessing Script for Mask R-CNN TorchScript Model Output
 
+This script applies the inverse transformations recorded during preprocessing
+(back-scaling and unpadding) to the predicted mask produced by the Mask R-CNN model.
+
+Key Features:
+- Loads a predicted mask tensor saved in .pt format.
+- Loads the corresponding transformation info in .json format.
+- Applies inverse padding removal and resizing to map the mask back to the original image size.
+- Saves the resulting mask as a .png image with the same base name as the input mask.
+
+Usage:
+    python postprocess_mask.py predicted_mask.pt transform_info.json [output_directory]
+
+Arguments:
+    - predicted_mask.pt: Path to the predicted mask tensor.
+    - transform_info.json: Path to the JSON file containing preprocessing transformation info.
+    - output_directory (optional): Directory where the output mask will be saved (default: current directory).
+
+Output:
+    - A .png file of the mask mapped back to the original image size.
+
+Author: Raphaël Kuhn
+"""
+
+import torch
+import json
+import sys
+import os
 import numpy as np
 import cv2
 
-
-def filter_false_positives(img, outputs, score_thresh=0.80, area_thresh_ratio=0.3, black_thresh_ratio=0.5):
+def inverse_transform_mask(mask_tensor, transform_info):
     """
-    img: image BGR (OpenCV)
-    outputs: output Detectron2 predictor
+    Apply inverse padding removal and resizing to the predicted mask tensor.
     """
+    mask = mask_tensor.squeeze().cpu().numpy()
 
-    # 1️⃣ Calculer le % de pixels noirs dans l'image
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    black_pixels = np.sum(gray < 10)  # seuil pour considérer "noir"
-    total_pixels = gray.shape[0] * gray.shape[1]
-    black_ratio = black_pixels / total_pixels
+    # Convert to uint8 binary mask if needed
+    if mask.dtype != np.uint8:
+        mask = (mask > 0.5).astype(np.uint8) * 255
 
-    if black_ratio < black_thresh_ratio:
-        # Pas besoin de filtrer
-        return outputs
+    # Remove padding
+    top, bottom, left, right = transform_info["padding"]
+    h_padded, w_padded = mask.shape[:2]
+    mask_cropped = mask[top:h_padded - bottom, left:w_padded - right]
 
-    # 2️⃣ Filtrage des instances
-    instances = outputs["instances"].to("cpu")
-    boxes = instances.pred_boxes.tensor.numpy()
-    scores = instances.scores.numpy()
+    # Resize back to original size
+    original_h, original_w = transform_info["original_size"]
+    mask_resized = cv2.resize(mask_cropped, (original_w, original_h), interpolation=cv2.INTER_NEAREST)
 
-    img_area = img.shape[0] * img.shape[1]
-    keep_indices = []
+    return mask_resized
 
-    for i in range(len(instances)):
-        score = scores[i]
-        box = boxes[i]
-        x1, y1, x2, y2 = box
-        area = (x2 - x1) * (y2 - y1)
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python postprocess_mask.py predicted_mask.pt transform_info.json [output_directory]")
+        sys.exit(1)
 
-        if score < score_thresh and area > area_thresh_ratio * img_area:
-            # On skip cette détection car faux positif probable
-            continue
-        else:
-            keep_indices.append(i)
+    mask_path = sys.argv[1]
+    transform_json_path = sys.argv[2]
+    output_dir = sys.argv[3] if len(sys.argv) > 3 else os.getcwd()
+    os.makedirs(output_dir, exist_ok=True)
 
-    # Créer les instances filtrées
-    filtered_instances = instances[keep_indices]
+    # Load mask tensor
+    mask_tensor = torch.load(mask_path, map_location="cpu")
 
-    # Retourner un outputs modifié
-    outputs["instances"] = filtered_instances
-    return outputs
+    # Load transformation info
+    with open(transform_json_path, "r") as f:
+        transform_info = json.load(f)
 
+    # Apply inverse transformations
+    mask_image = inverse_transform_mask(mask_tensor, transform_info)
 
-def reverse_image():
-    return
+    # Prepare output path
+    base_name = os.path.splitext(os.path.basename(mask_path))[0]
+    output_path = os.path.join(output_dir, base_name + "_postprocessed.png")
+
+    # Save mask
+    cv2.imwrite(output_path, mask_image)
+
+    print(f"Masque post-traité sauvegardé : {output_path}")
+    print(f"Shape du masque post-traité : {mask_image.shape}")

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script convert jsons obtained through labelme segmentation into a ready to use detectron2 dataset
+
 # Usage:
 # ./build_detectron_dataset.sh path/to/json_folder path/to/images_folder path/to/output_dataset_folder
 

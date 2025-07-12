@@ -1,0 +1,15 @@
+INFO: Ce README est temporaire, une nouvelle doc plus facile a comprendre et plus exhaustive est en projet
+
+Input: Une image de taille quelconque
+|
+|
+|
+|
+v
+Preprocess: - Redimensionne avec ajout de padding pour correspondre au format 1200x1200 l'image d entree - Quelques conversion mineures de format d'encodage
+|
+|-----------------------------------------------------------------------------> Info de transformation effectuees
+|
+| Tenseur de l'image transformee
+v
+Segmentation & Detetction
