@@ -1,3 +1,8 @@
+'''
+Ce script reorganise toutes les images d'un dossier et de ses sous-dossier en un seul
+Il renomme ces images pour avoir quelque chose d'uniforme
+'''
+
 import os
 import shutil
 from pathlib import Path
