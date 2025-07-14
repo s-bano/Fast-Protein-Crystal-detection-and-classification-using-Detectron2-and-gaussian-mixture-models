@@ -79,7 +79,7 @@ def preprocess_image(img_path, target_size=1024):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python preprocess_image.py /path/to/image.jpg [output_directory]")
+        print("Usage: python preprocess.py /path/to/image.jpg [output_directory]")
         sys.exit(1)
 
     image_path = sys.argv[1]

@@ -12,4 +12,12 @@ Preprocess: - Redimensionne avec ajout de padding pour correspondre au format 12
 |
 | Tenseur de l'image transformee
 v
-Segmentation & Detetction
+Segmentation & Detetction : Detectron2 based model
+|
+|
+| Masque de segmentation calcule
+|
+v
+Postprocess: 
++ Info de transformation du Postprocess
+-> Inversion de la trasnformation initale sur le masque puis calcul des sizes

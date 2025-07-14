@@ -11,7 +11,7 @@ Key Features:
 - Saves the resulting mask as a .png image with the same base name as the input mask.
 
 Usage:
-    python postprocess_mask.py predicted_mask.pt transform_info.json [output_directory]
+    python postprocess.py predicted_mask.pt transform_info.json [output_directory]
 
 Arguments:
     - predicted_mask.pt: Path to the predicted mask tensor.
