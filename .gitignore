@@ -16,4 +16,8 @@ crystal_unresolved
 *.zip
 database_build/test_detectron_dataset
 AI/images_output
-AI/model_final.pth
+AI/images_output1
+AI/image_0001.*
+*.pth
+*.pt
+*.onnx

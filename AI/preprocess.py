@@ -14,7 +14,7 @@ Key Features:
 - Saves the preprocessed tensor and the transformation parameters in a specified output directory.
 
 Usage:
-    python preprocess_image.py /path/to/input_image.jpg [output_directory]
+    python preprocess.py /path/to/input_image.jpg [output_directory]
 
 Arguments:
     The script expects:

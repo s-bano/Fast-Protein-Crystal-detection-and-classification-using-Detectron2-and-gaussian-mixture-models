@@ -35,7 +35,7 @@ def inverse_transform_mask(mask_tensor, transform_info):
     """
     Apply inverse padding removal and resizing to the predicted mask tensor.
     """
-    mask = mask_tensor.squeeze().cpu().numpy()
+    mask = mask_tensor.squeeze().cpu().detach().numpy()
 
     # Convert to uint8 binary mask if needed
     if mask.dtype != np.uint8:
@@ -64,6 +64,10 @@ if __name__ == "__main__":
 
     # Load mask tensor
     mask_tensor = torch.load(mask_path, map_location="cpu")
+
+    # Si le modèle retourne un tuple, on récupère le masque
+    if isinstance(mask_tensor, tuple):
+        mask_tensor = mask_tensor[3]  # adapter l'indice si besoin
 
     # Load transformation info
     with open(transform_json_path, "r") as f:

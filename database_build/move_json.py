@@ -1,6 +1,8 @@
 '''
 Ce script deplace tout les fichiers .json d un dossier dans un autre
 Utile dans le contexte de labelisation des images
+
+Usage : python move_json.py dossier_source dossier_destination
 '''
 
 import os

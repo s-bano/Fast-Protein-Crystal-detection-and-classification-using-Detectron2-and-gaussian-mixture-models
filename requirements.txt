@@ -5,6 +5,7 @@ tesseract
 torch
 pillow
 torchvision
+onnx
 
 # Pour labeliser des images
 labelme

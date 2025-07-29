@@ -15,6 +15,19 @@ The specific objectives of the project are:
 
 ## Installation
 
+#### Basic Requirements
+
+- Python 3. - Needed for everything from dataset creation to process images.
+- Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
+
+### Step 1: Clone the project
+
+```bash
+git clone
+```
+
+### Step 2: Install Dependencies
+
 <!--
 If you are on Linux or MacOS you can simply run:
 
@@ -44,6 +57,8 @@ Download the installation program on : https://github.com/tesseract-ocr/tesserac
 ⚠️ Make sure tesseract is in your PATH.
 
 ## 2. Python Dependencies -->
+
+Run the following command to install the required Python packages:
 
 ```bash
 pip install -r requirements.txt
