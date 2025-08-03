@@ -30,6 +30,8 @@ import sys
 import os
 import numpy as np
 import cv2
+from PIL import Image
+from torchvision.transforms.functional import to_pil_image
 
 def inverse_transform_mask(mask_tensor, transform_info):
     """
@@ -52,13 +54,16 @@ def inverse_transform_mask(mask_tensor, transform_info):
 
     return mask_resized
 
+
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Usage: python postprocess_mask.py predicted_mask.pt transform_info.json [output_directory]")
         sys.exit(1)
 
     mask_path = sys.argv[1]
-    transform_json_path = sys.argv[2]
+    transform_json_path = sys.argv[2] if len(sys.argv) > 2 else "pass"
     output_dir = sys.argv[3] if len(sys.argv) > 3 else os.getcwd()
     os.makedirs(output_dir, exist_ok=True)
 
@@ -70,18 +75,24 @@ if __name__ == "__main__":
         mask_tensor = mask_tensor[3]  # adapter l'indice si besoin
 
     # Load transformation info
-    with open(transform_json_path, "r") as f:
-        transform_info = json.load(f)
+    # if transform_json_path != 'pass':
+    #     print("hey")
+    #     with open(transform_json_path, "r") as f:
+    #         transform_info = json.load(f)
 
-    # Apply inverse transformations
-    mask_image = inverse_transform_mask(mask_tensor, transform_info)
+    #     # Apply inverse transformations
+    #     mask_image = inverse_transform_mask(mask_tensor, transform_info)
 
-    # Prepare output path
-    base_name = os.path.splitext(os.path.basename(mask_path))[0]
-    output_path = os.path.join(output_dir, base_name + "_postprocessed.png")
+    # # Prepare output path
+    # base_name = os.path.splitext(os.path.basename(mask_path))[0]
+    # output_path = os.path.join(output_dir, base_name + "_postprocessed.png")
 
-    # Save mask
-    cv2.imwrite(output_path, mask_image)
+    # # Save mask
+    # cv2.imwrite(output_path, mask_image)
+    
+    image = to_pil_image(mask_tensor)
+    image.show()      # Affiche
+    image.save("image.png")  # Enregistre
 
-    print(f"Masque post-traité sauvegardé : {output_path}")
-    print(f"Shape du masque post-traité : {mask_image.shape}")
+    # print(f"Masque post-traité sauvegardé : {output_path}")
+    # print(f"Shape du masque post-traité : {mask_image.shape}")
