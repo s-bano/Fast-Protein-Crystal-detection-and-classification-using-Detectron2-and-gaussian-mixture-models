@@ -13,12 +13,12 @@ The specific objectives of the project are:
 - **Optimization**: To optimize the AI algorithms for better performance and adaptability to different types of protein crystals.
 - **Validation**: To validate the AI-enhanced measurement system through extensive testing and application in actual protein crystallography experiments. -->
 
-## Basic Requirements
+## 📝 Basic Requirements
 
 - Python 3. - Needed for everything from dataset creation to process images.
 - Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
 
-## Running Crystal Detection with Google Colab
+## 💾 Running Crystal Detection with Google Colab
 
 We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.
 
@@ -48,7 +48,7 @@ We provide a ready-to-use **Google Colab notebook** to run the crystal detection
 - The output ZIP will mirror your input folder structure.
 - In the future, the aim is to deploy this app so it can be run on local devices and after that on microfluidic devices (Go [here](#deployment) for more infos)
 
-## Crystal Detection Training
+## 📝 Crystal Detection Training
 
 This section is only if you want to train your own Detectron2 model for crystal detection and segmentation.
 To simply run the crystal detection on a set of images, please go [here](#running-crystal-detection-with-google-colab)
@@ -80,7 +80,7 @@ To simply run the crystal detection on a set of images, please go [here](#runnin
 
 Not supported yet...
 
-## 🧪 Dataset Building
+## 🧠 Dataset Building
 
 All the scripts required for this section are located in the `database_build` folder of this repository.
 
@@ -115,7 +115,7 @@ The goal of this section is to **perform unsupervised classification of detected
 
 This involves analyzing the segmented crystals and grouping them into different classes **without prior labeling**, using techniques such as clustering or dimensionality reduction based on extracted descriptors.
 
-## Deployment
+## 🧪 Deployment
 
 This section focuses on **integrating AI models with microfluidic devices to enable automated, real-time crystal measurement**.
 
@@ -123,8 +123,10 @@ The first step is to run the crystal detection script on local devices. Currentl
 
 The long-term objective is to deploy crystal detection and classification directly on microfluidic devices, which will bring additional challenges to address.
 
-## Roadmap
+## 🚧 Roadmap
 
 - Validate the AI-enhanced measurement system through extensive testing.
-- Classification of cristals
-- Deployment and application in actual protein crystallography experiments.
+- Properly document the Google Colab scripts.
+- Export models and scripts to enable local execution.
+- Perform unsupervised classification of crystals.
+- Deploy the full pipeline in real-world protein crystallography experiments.
