@@ -13,6 +13,11 @@ The specific objectives of the project are:
 - **Optimization**: To optimize the AI algorithms for better performance and adaptability to different types of protein crystals.
 - **Validation**: To validate the AI-enhanced measurement system through extensive testing and application in actual protein crystallography experiments. -->
 
+## Basic Requirements
+
+- Python 3. - Needed for everything from dataset creation to process images.
+- Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
+
 ## Running Crystal Detection with Google Colab
 
 We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.
@@ -118,45 +123,8 @@ The first step is to run the crystal detection script on local devices. Currentl
 
 The long-term objective is to deploy crystal detection and classification directly on microfluidic devices, which will bring additional challenges to address.
 
-## Installation
+## Roadmap
 
-#### Basic Requirements
-
-- Python 3. - Needed for everything from dataset creation to process images.
-- Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
-
-### Step 1: Clone the project
-
-```bash
-git clone
-```
-
-### Step 2: Install Dependencies
-
-<!--
-If you are on Linux or MacOS you can simply run:
-
-```bash
-./install.sh
-```
-
-If not or you just want to follow the installation process step by step, here's how to do so:
-
-## 1. System Requirements
-
-### macOS
-
-```bash
-brew install tesseract
-```
-
-### Ubuntu/Debian
-
-```bash
-sudo apt install tesseract-ocr
-```
-
-### Windows
-
-Download the installation program on : https://github.com/tesseract-ocr/tesseract
-⚠️ Make sure tesseract is in your PATH.
+- Validate the AI-enhanced measurement system through extensive testing.
+- Classification of cristals
+- Deployment and application in actual protein crystallography experiments.
