@@ -1,6 +1,9 @@
 '''
-Ce script reorganise toutes les images d'un dossier et de ses sous-dossier en un seul
-Il renomme ces images pour avoir quelque chose d'uniforme
+This script reorganizes all images from a folder and its subfolders into a single output directory.  
+It also renames the images to ensure a consistent and uniform naming convention.  
+Note: Files are copied**, not moved, so the original folder structure remains unchanged.
+
+Usage : python flatten_names.py [source_folder] [output_folder]
 '''
 
 import os
@@ -27,6 +30,6 @@ def flatten_and_rename_images(input_dir, output_dir, extensions={'.jpg', '.jpeg'
 if __name__ == "__main__":
     import sys
     if len(sys.argv) != 3:
-        print("Utilisation : python flatten_images_renamed.py dossier_source dossier_destination")
+        print("Usage : python flatten_names.py [source_folder] [output_folder]")
     else:
         flatten_and_rename_images(sys.argv[1], sys.argv[2])
