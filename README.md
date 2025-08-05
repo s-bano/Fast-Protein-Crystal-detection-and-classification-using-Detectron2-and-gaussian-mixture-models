@@ -15,12 +15,15 @@ The specific objectives of the project are:
 
 ## 📝 Basic Requirements
 
-- Python 3. - Needed for everything from dataset creation to process images.
+- Python >= 3.12 - Needed for everything from dataset creation to process images.
 - Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
+
+---
 
 ## 💾 Running Crystal Detection with Google Colab
 
-We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.
+We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.  
+In the future, we aim to deploy this app so it can be run on local devices and after that on microfluidic devices (Go [here](#deployment) for more infos)
 
 ### Features
 
@@ -34,19 +37,12 @@ We provide a ready-to-use **Google Colab notebook** to run the crystal detection
 1. Open the [Colab notebook](https://colab.research.google.com/drive/1SlUv-KsLp-mUdxJQZ1cdwdg4xdY7QlKu?usp=sharing).
 2. Make a **copy** of the notebook to your own Google Drive.
 3. Upload your images ZIP archive and your `.pth` model file.
-   > [Here]() is the link to the latest model trained by us.  
+   > [Here](https://liverguac-my.sharepoint.com/:f:/g/personal/r_kuhn_rgu_ac_uk/Eqou7erMVKBNpnR7u5lhXRQBeREYnuNjxXD12QRsb1UFqg?e=Pv7mB7) is the link to the latest model trained by us.  
    > If you want to train your own model, please go to [Crystal Detection Training](#crystal-detection-training)
 4. Edit the example paths in the notebook to match your files.
 5. Run all cells (`Runtime > Run all`) to process your images.
 
 ---
-
-### Notes
-
-- The notebook supports recursive folders inside the ZIP archive.
-- A pre-trained model by Raphaël Kuhn is provided, or you can train your own.
-- The output ZIP will mirror your input folder structure.
-- In the future, the aim is to deploy this app so it can be run on local devices and after that on microfluidic devices (Go [here](#deployment) for more infos)
 
 ## 📝 Crystal Detection Training
 
@@ -58,7 +54,7 @@ To simply run the crystal detection on a set of images, please go [here](#runnin
 - A dataset of labeled crystal images (COCO format)
 
   > If you want to build your own dataset, please refer to the [Dataset Building](#dataset-building) section for instructions and resources.  
-  > Otherwise, you can download the latest labeled dataset created by Raphaël Kuhn [here](insert_link).
+  > Otherwise, you can download the latest labeled dataset created by Raphaël Kuhn [here](https://liverguac-my.sharepoint.com/:f:/g/personal/r_kuhn_rgu_ac_uk/Eqou7erMVKBNpnR7u5lhXRQBeREYnuNjxXD12QRsb1UFqg?e=Pv7mB7).
 
 - Detectron2 installation guide: [Download here](https://detectron2.readthedocs.io/en/latest/tutorials/install.html)
 
@@ -79,6 +75,8 @@ To simply run the crystal detection on a set of images, please go [here](#runnin
 ### Train on local device
 
 Not supported yet...
+
+---
 
 ## 🧠 Dataset Building
 
@@ -117,11 +115,15 @@ All the scripts required for this section are located in the `database_build` fo
    python build_detectron_dataset.py [jsons_folder] [images_folder] [output_folder_name]
    ```
 
+---
+
 ## 🔬 Crystal Classification (WIP)
 
 The goal of this section is to **perform unsupervised classification of detected crystals** by extracting meaningful visual features.
 
 This involves analyzing the segmented crystals and grouping them into different classes **without prior labeling**, using techniques such as clustering or dimensionality reduction based on extracted descriptors.
+
+---
 
 ## 🧪 Deployment
 
@@ -130,6 +132,8 @@ This section focuses on **integrating AI models with microfluidic devices to ena
 The first step is to run the crystal detection script on local devices. Currently, running the script requires Detectron2, which can be challenging to install. Therefore, the immediate goal is to export the trained Detectron2 model to TorchScript for easier deployment.
 
 The long-term objective is to deploy crystal detection and classification directly on microfluidic devices, which will bring additional challenges to address.
+
+---
 
 ## 🚧 Roadmap
 
