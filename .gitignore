@@ -21,3 +21,5 @@ AI/image_0001.*
 *.pth
 *.pt
 *.onnx
+*.pkl
+*.h5

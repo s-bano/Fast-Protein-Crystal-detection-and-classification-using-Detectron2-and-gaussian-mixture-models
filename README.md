@@ -91,18 +91,26 @@ All the scripts required for this section are located in the `database_build` fo
    pip install -r requirements.txt
    ```
 
-1. **Labeling**  
+1. **(Optional) Rearrange images names**
+   Use this script to correctly name all your images
+
+   ```bash
+   python flatten_names.py [source_folder] [output_folder]
+
+   ```
+
+2. **Labeling**  
    Use [Labelme](https://github.com/wkentaro/labelme) (or any compatible tool) to annotate your images.  
    Delimit each crystal with a polygon and assign it the class name `cristal`, then save the annotations in `.json` format.
 
-2. **(Optional) Organize JSON Files**  
+3. **(Optional) Organize JSON Files**  
    You can use the script below to move all `.json` files from one folder to another:
 
    ```bash
    python move_json.py [source_folder] [output_folder]
    ```
 
-3. **Build the Dataset**  
+4. **Build the Dataset**  
    Finally, run the script below to automatically generate a dataset in COCO format with all necessary annotation files:
 
    ```bash

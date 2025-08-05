@@ -5,7 +5,8 @@ tesseract
 torch
 pillow
 torchvision
-onnx
+scikit-learn 
+h5py
 
 # Pour labeliser des images
 labelme
