@@ -9,8 +9,8 @@ from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
 
-STANDARD_MODEL = "model_classif_0805.pkl"
-STANDARD_SCALER = "scaler_classif_0805.pkl"
+STANDARD_MODEL = "model_classif_0806.pkl"
+STANDARD_SCALER = "scaler_classif_0806.pkl"
 
 
 # Classifier chaque cristal d'une image
@@ -26,6 +26,8 @@ def classify_image(image_features, model_path=STANDARD_MODEL, scaler_path=STANDA
         output:
             clusters: list(int) List of class_id predicted
     """
+    if image_features.shape[0] == 0:
+        return np.array([])
     
     # Charger le scaler et le modèle
     scaler = joblib.load(scaler_path)

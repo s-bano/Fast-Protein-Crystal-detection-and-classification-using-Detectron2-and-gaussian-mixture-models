@@ -5,10 +5,10 @@ from sklearn.preprocessing import StandardScaler
 
 
 # === Paramètres ===
-h5_path = "crystal_features_sample.h5"
+h5_path = "crystal_features_0806.h5"
 n_clusters = 4  # à ajuster selon le nombre de classes supposées
-output_model_path = "model_classif_0805.pkl"
-output_scaler_path = "scaler_classif_0805.pkl"
+output_model_path = "model_classif_0806.pkl"
+output_scaler_path = "scaler_classif_0806.pkl"
 normalize = True
 
 
