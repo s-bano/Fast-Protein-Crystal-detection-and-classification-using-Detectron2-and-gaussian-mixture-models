@@ -23,3 +23,5 @@ AI/image_0001.*
 *.onnx
 *.pkl
 *.h5
+Classification/archive
+dataset_classif_0812

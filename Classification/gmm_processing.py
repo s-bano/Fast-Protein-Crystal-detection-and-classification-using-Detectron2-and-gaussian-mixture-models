@@ -7,14 +7,26 @@ import h5py, os, time, joblib, sys, csv
 import numpy as np
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
+from collections import Counter
+from sklearn.decomposition import PCA
+from collections import Counter
 
 
-STANDARD_MODEL = "model_classif_0806.pkl"
-STANDARD_SCALER = "scaler_classif_0806.pkl"
+
+
+
+STANDARD_MODEL = "model_classif_0808.pkl"
+STANDARD_SCALER = "scaler_classif_0808.pkl"
+PCA_DIM = 64
+
+def proportions(lst):
+    count = Counter(lst)
+    total = len(lst)
+    return {"Cluster id " + str(int(k)): v / total for k, v in count.items()}
 
 
 # Classifier chaque cristal d'une image
-def classify_image(image_features, model_path=STANDARD_MODEL, scaler_path=STANDARD_SCALER):
+def classify_image(image_features, model_path=STANDARD_MODEL, scaler_path=STANDARD_SCALER, pca=''):
     """
         This function will classify each detected cristals from it
         
@@ -30,11 +42,10 @@ def classify_image(image_features, model_path=STANDARD_MODEL, scaler_path=STANDA
         return np.array([])
     
     # Charger le scaler et le modèle
-    scaler = joblib.load(scaler_path)
     model = joblib.load(model_path)
     
-    X_scaled = scaler.fit_transform(image_features)
-    clusters = model.predict(X_scaled)
+    
+    clusters = model.predict(image_features)
     return clusters
 
 
@@ -54,6 +65,8 @@ def extract_h5(h5_path):
             all_box_features.append(box_feats)
             image_names.append(img_name)
     return all_box_features, image_names
+
+  
 
 
 
@@ -86,19 +99,50 @@ def full_pipeline(h5_path, output_path="results_cluster.csv", model_path=STANDAR
     print("Openning file...")
     list_images_features, list_img_names = extract_h5(h5_path)
     
-    print("Predicting clusters...")
     list_clusters = []
+    cluster_counter = Counter()
     start_time = time.time()
-    nbr_images = 0
-    for image in list_images_features:
-        clusters = classify_image(image, model_path, scaler_path)
-        list_clusters.append(clusters)
-        nbr_images += 1
+    nbr_images = len(list_img_names)
+    total_cristaux = 0
+    
+    
+    # for image in list_images_features:
+    #     clusters = classify_image(image, model_path, scaler_path, pca)
+    #     list_clusters.append(clusters)
+    #     cluster_counter.update(clusters.tolist())  # Comptage global des clusters
+    #     total_cristaux += len(clusters)
+    #     nbr_images += 1
+        
+    print("Scaling and PCA features...")
+    scaler = joblib.load(scaler_path)
+    X = np.concatenate(list_images_features, axis=0)  # shape (total_boxes, D)
+    print(X.shape)
+    X_scaled = scaler.fit_transform(X)
+    pca = PCA(n_components=PCA_DIM)
+    X = pca.fit_transform(X_scaled) 
+    print(X.shape)
+    
+    
+    
+    print("Predicting clusters...")
+    clusters = classify_image(X)
+    
     end_time = time.time()
     total_time = end_time - start_time
+    
+    resultat = proportions(clusters)
+    
+    
     print(f"{nbr_images} images processed in {total_time:.3f}s")
-    print("Saving predictions...")
-    clusters2csv(list_img_names, list_clusters, output_path)
+    print(f"Repartition: {resultat}") 
+    # print("Saving predictions...")
+    # clusters2csv(list_img_names, list_clusters, output_path)
+    
+    # print(f"\n✅ Classification summary ({total_cristaux} cristaux classés) :")
+    # for cluster_id in sorted(cluster_counter.keys()):
+    #     print(f"  Cluster {cluster_id}: {cluster_counter[cluster_id]} cristaux")
+    
+    sys.exit(0)
 
 
 if __name__ == "__main__":

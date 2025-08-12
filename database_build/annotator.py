@@ -1,5 +1,8 @@
 """
 Usage : python3 annotator.py <dossier_images>"
+
+Ce script sert a creer un fichier annotations.jsons pour des dossiers d'images non annotees.
+Utilise en particulier avant de faire de l extraction de features sur des images non annotees.
 """
 
 
@@ -8,9 +11,13 @@ import json
 import sys
 from PIL import Image
 
+valid_exts = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tif', '.tiff')             # Extensions d'images autorisées
+image_id = 1                                                            # Index de depart
+
+
 # Vérification des arguments
 if len(sys.argv) != 2:
-    print("Utilisation : python3 annotator.py <dossier_images>")
+    print("Usage : python3 annotator.py <dossier_images>")
     sys.exit(1)
 
 image_dir = sys.argv[1]
@@ -21,12 +28,10 @@ if not os.path.isdir(image_dir):
 # Nom du fichier de sortie
 output_json = os.path.join(image_dir, "annotations.json")
 
-# Extensions d'images autorisées
-valid_exts = ('.jpg', '.jpeg', '.png', '.bmp', '.gif')
 
 # Liste des images
 images = []
-image_id = 1
+
 
 for fname in sorted(os.listdir(image_dir)):
     if fname.lower().endswith(valid_exts):

@@ -10,12 +10,14 @@ import os
 import shutil
 from pathlib import Path
 
-def flatten_and_rename_images(input_dir, output_dir, extensions={'.jpg', '.jpeg', '.png'}):
+valid_exts = {'.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tif', '.tiff'}
+
+def flatten_and_rename_images(input_dir, output_dir, extensions=valid_exts):
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    count = 0
+    count = 1013
     for filepath in sorted(input_dir.rglob('*')):
         if filepath.suffix.lower() in extensions:
             count += 1
