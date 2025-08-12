@@ -6,11 +6,11 @@ from sklearn.decomposition import PCA
 
 
 # === Paramètres ===
-h5_path = "features_train_0806.h5"
-n_clusters = 3  # à ajuster selon le nombre de classes supposées
+h5_path = "features_train_0812.h5"
+n_clusters = 4  # à ajuster selon le nombre de classes supposées
 pca_dim = 64
-output_model_path = "model_classif_0808.pkl"
-output_scaler_path = "scaler_classif_0808.pkl"
+output_model_path = "model_classif_0812.pkl"
+output_scaler_path = "scaler_classif_0812.pkl"
 normalize = True
 
 
@@ -70,5 +70,8 @@ print('Saving model...')
 joblib.dump(gmm, output_model_path)
 joblib.dump(scaler, output_scaler_path)
 
-print(gmm.weights_)
+
 print(f"✅ GMM model trained and saved ({n_clusters} clusters, {X.shape[0]} cristaux, training_time: {total_time:.3f}s)")
+print("Cluster weights:", gmm.weights_)
+print("Means shape:", gmm.means_.shape)
+print("Covariances shape:", gmm.covariances_.shape)

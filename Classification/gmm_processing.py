@@ -3,20 +3,16 @@ Usage : python gmm_processing.py <dataset_features.h5> [output_file] [model.pkl]
 (Leave model and scaler empty if you want to use the default latest trained one by Raphaël Kuhn)
 """
 
-import h5py, os, time, joblib, sys, csv
+import h5py, time, joblib, sys, csv
 import numpy as np
-from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
 from collections import Counter
 from sklearn.decomposition import PCA
 from collections import Counter
 
 
 
-
-
-STANDARD_MODEL = "model_classif_0808.pkl"
-STANDARD_SCALER = "scaler_classif_0808.pkl"
+STANDARD_MODEL = "model_classif_0812.pkl"
+STANDARD_SCALER = "scaler_classif_0812.pkl"
 PCA_DIM = 64
 
 def proportions(lst):
@@ -67,9 +63,6 @@ def extract_h5(h5_path):
     return all_box_features, image_names
 
   
-
-
-
 # Enregistrer les clusters dans un csv
 # NOTE: A changer pour combiner avec les csv fournis par le detecteur
 def clusters2csv(image_names, clusters, output_csv):
@@ -90,8 +83,6 @@ def clusters2csv(image_names, clusters, output_csv):
             for i in range(n_cristaux):                  
                 cristal_name = f"cristal{i+1}"                  # A changer bientot pour combiner avec les csv de detection
                 writer.writerow([cristal_name, cluster[i]])
-                
-    print(f"✅Clusters saved successfully: {output_csv}")
 
 
 def full_pipeline(h5_path, output_path="results_cluster.csv", model_path=STANDARD_MODEL, scaler_path=STANDARD_SCALER):
@@ -99,48 +90,54 @@ def full_pipeline(h5_path, output_path="results_cluster.csv", model_path=STANDAR
     print("Openning file...")
     list_images_features, list_img_names = extract_h5(h5_path)
     
-    list_clusters = []
-    cluster_counter = Counter()
+    # Compter le nombre de cristaux par images avant la concatenation
+    # Pour apres rerépartir les cristaux par images 
+    print("Counting nbr cristals per images...")
+    list_nbr_cristaux = []
+    for img_features in list_images_features:
+        list_nbr_cristaux.append(img_features.shape[0])
+    
+    # LAncement du chronometre
     start_time = time.time()
     nbr_images = len(list_img_names)
-    total_cristaux = 0
-    
-    
-    # for image in list_images_features:
-    #     clusters = classify_image(image, model_path, scaler_path, pca)
-    #     list_clusters.append(clusters)
-    #     cluster_counter.update(clusters.tolist())  # Comptage global des clusters
-    #     total_cristaux += len(clusters)
-    #     nbr_images += 1
         
+    # Concatenation de sfeatures, pca et scaling
     print("Scaling and PCA features...")
     scaler = joblib.load(scaler_path)
     X = np.concatenate(list_images_features, axis=0)  # shape (total_boxes, D)
-    print(X.shape)
     X_scaled = scaler.fit_transform(X)
     pca = PCA(n_components=PCA_DIM)
     X = pca.fit_transform(X_scaled) 
-    print(X.shape)
-    
-    
-    
+
+    # Prediction des clusters
     print("Predicting clusters...")
     clusters = classify_image(X)
+    print(clusters.shape)
     
+    # Fin du chrono
     end_time = time.time()
     total_time = end_time - start_time
     
     resultat = proportions(clusters)
     
     
-    print(f"{nbr_images} images processed in {total_time:.3f}s")
-    print(f"Repartition: {resultat}") 
-    # print("Saving predictions...")
-    # clusters2csv(list_img_names, list_clusters, output_path)
+    # RErepartir les cristaux par images
+    count = 0
+    list_clusters = []
+    for N_i in list_nbr_cristaux:
+        clusters_img = clusters[count:count+N_i]
+        list_clusters.append(clusters_img)
+        count = count+N_i
+
+    # Enregistrement des clusters predits au format CSV
+    print("Saving predictions...")
+    clusters2csv(list_img_names, list_clusters, output_path)
     
-    # print(f"\n✅ Classification summary ({total_cristaux} cristaux classés) :")
-    # for cluster_id in sorted(cluster_counter.keys()):
-    #     print(f"  Cluster {cluster_id}: {cluster_counter[cluster_id]} cristaux")
+    # Affichage des statistiques
+    print(f"\n✅ Clusters saved successfully: {output_path}")
+    print(f"   Classification summary: \n{nbr_images} images processed in {total_time:.3f}s")
+    print(f"Repartition: {resultat}") 
+
     
     sys.exit(0)
 
