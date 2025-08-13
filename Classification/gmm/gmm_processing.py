@@ -15,6 +15,7 @@ STANDARD_MODEL = "model_classif_0812.pkl"
 STANDARD_SCALER = "scaler_classif_0812.pkl"
 PCA_DIM = 64
 
+
 def proportions(lst):
     count = Counter(lst)
     total = len(lst)

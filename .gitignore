@@ -11,7 +11,7 @@ Crystal\ images\ Filip\ -\ results/
 crystaldetection
 extracted_cristals
 missing\ resolved\ crystal\ images
-.DS_Store
+*.DS_Store*
 crystal_unresolved
 *.zip
 database_build/test_detectron_dataset
