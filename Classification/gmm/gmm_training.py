@@ -1,77 +1,45 @@
-import h5py, os, time, joblib
 import numpy as np
 from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
+import gmm_tools
 
 
 # === Paramètres ===
 h5_path = "features_train_0812.h5"
 n_clusters = 4  # à ajuster selon le nombre de classes supposées
-pca_dim = 64
-output_model_path = "model_classif_0812.pkl"
-output_scaler_path = "scaler_classif_0812.pkl"
-normalize = True
+output_model_path = "model_classif_0815.pkl"
+pca_dim = gmm_tools.PCA_DIM
 
 
 # === Étape 1: Charger tous les box_features ===
 print("Extracting box features...")
-all_box_features = []
-
-with h5py.File(h5_path, "r") as f:
-    nbr_images = len(f.keys())
-    for img_name in f.keys():
-        box_feats = f[img_name]["box_features"][:]  # shape (N, D)
-        all_box_features.append(box_feats)
+all_box_features, image_names = gmm_tools.extract_h5(h5_path)
 
 
-
-
-# === Étape 2: Concaténation ===
-print("Concatenate box features...")
-X = np.concatenate(all_box_features, axis=0)  # shape (total_boxes, D)
-
-
-# === Étape 3: Normalisation (optionnelle mais recommandée) ===
+# === Étape 3: Normalisation ===
 print("Data normalisation...")
-if normalize:
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-else:
-    X_scaled = X
-X_scaled = X_scaled.astype(np.float64)
-
-print("X_scaled shape:", X_scaled.shape)
-print("Nan ?", np.isnan(X_scaled).any())
-print("Inf ?", np.isinf(X_scaled).any())
-print("Max abs:", np.max(np.abs(X_scaled)))
-
-pca = PCA(n_components=pca_dim)
-X_scaled = pca.fit_transform(X_scaled)
-print(X.shape)
+X_scaled = gmm_tools.normalize(all_box_features, pca_dim=pca_dim)
 
 
-# === Étape 4: Entraînement du GMM ===
-print("GMM training...")
-start_time = time.time()
-
+# === Étape 4: Configuration du modele GMM a entrainer ===
 gmm = GaussianMixture(
     n_components=n_clusters, 
     covariance_type='full', 
-    reg_covar=1e-4,  # augmente si le problème persiste
+    reg_covar=1e-4, 
     random_state=42)
 
-gmm.fit(X_scaled)
-end_time = time.time()
-total_time = end_time - start_time
 
-# === Étape 5: Sauvegarde du modèle et du scaler ===
-print('Saving model...')
-joblib.dump(gmm, output_model_path)
-joblib.dump(scaler, output_scaler_path)
+# === Étape 5: Entrainement du modele ===
+gmm_infos = gmm_tools.training(X_scaled, gmm, output_model_path)
 
 
-print(f"✅ GMM model trained and saved ({n_clusters} clusters, {X.shape[0]} cristaux, training_time: {total_time:.3f}s)")
-print("Cluster weights:", gmm.weights_)
-print("Means shape:", gmm.means_.shape)
-print("Covariances shape:", gmm.covariances_.shape)
+# === Étape 6: Analyse du model ===
+gmm_model = gmm_infos['model']
+ouptut_path = gmm_infos['model_path']
+total_time = gmm_infos['training_time']
+nbr_clusters_found = gmm_infos['nbr_clusters']
+
+
+print(f"✅ GMM model trained and saved ({nbr_clusters_found} clusters, training_time: {total_time:.3f}s)")
+print("Cluster weights:", gmm_model.weights_)
+print("Means shape:", gmm_model.means_.shape)
+print("Covariances shape:", gmm_model.covariances_.shape)

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crystalmetrics"
+version = "0.1.0"
+description = "PAckage python comportant des outils pour l'entrainement, l'utilisation de modele de detection/segmentation/classification de cristaux sur des images"
+authors = [{ name = "Raphaël Kuhn", email = "r.kuhn@rgu.ac.uk" }]
+dependencies = [
+    "opencv-python",
+    "pytesseract",
+    "numpy",
+    "torch",
+    "pillow",
+    "torchvision",
+    "scikit-learn",
+    "h5py",
+]

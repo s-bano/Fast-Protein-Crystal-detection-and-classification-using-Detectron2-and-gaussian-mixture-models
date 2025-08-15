@@ -6,45 +6,37 @@ Usage : python gmm_processing.py <dataset_features.h5> [output_file] [model.pkl]
 import time, joblib, sys
 import numpy as np
 import gmm_tools
+from sklearn.preprocessing import StandardScaler
 
 
 
-def full_pipeline(h5_path, **kwargs):
-    
-    
-    output_path = kwargs.get("output_csv_path", "results_cluster.csv")
-    model_path = kwargs.get("model_path", gmm_tools.STANDARD_MODEL)
-    scaler = kwargs.get("scaler", gmm_tools.STANDARD_SCALER)
-    pca_dim = kwargs.get("pca_dim", gmm_tools.PCA_DIM)
-    
-    
-    # === Étape 1: Charger toutes les features ===
+def full_pipeline(h5_path, output_path="results_cluster.csv", model_path=gmm_tools.STANDARD_MODEL, scaler=StandardScaler(), pca_dim=gmm_tools.PCA_DIM):
     
     print("Openning file...")
     list_images_features, list_img_names = gmm_tools.extract_h5(h5_path)
     
-    # Compter le nombre de cristaux par images avant la concatenation pour apres rerépartir les cristaux par images 
+    # Compter le nombre de cristaux par images avant la concatenation
+    # Pour apres rerépartir les cristaux par images 
     print("Counting nbr cristals per images...")
     list_nbr_cristaux = [arr.shape[0] for arr in list_images_features]
     nbr_images = len(list_img_names)
     
-    
-    # === Étape 2: Passer les features dans le modele ===
-    
     # Lancement du chronometre
-    start_time = time.time()                                        
+    start_time = time.time()
         
     # Concatenation des features, pca et scaling
-    print("Normalizing features...")
     X = gmm_tools.normalize(list_images_features, pca_dim, scaler)
 
     # Prediction des clusters
     print("Predicting clusters...")
-    clusters = gmm_tools.classify_batch(X, model_path)
+    clusters = gmm_tools.classify_batch(X)
     print(clusters.shape)
     
     # Fin du chrono
-    total_time = time.time() - start_time
+    end_time = time.time()
+    total_time = end_time - start_time
+    
+    resultat = gmm_tools.proportions(clusters)
     
     
     # RErepartir les cristaux par images
@@ -62,7 +54,7 @@ def full_pipeline(h5_path, **kwargs):
     # Affichage des statistiques
     print(f"\n✅ Clusters saved successfully: {output_path}")
     print(f"   Classification summary: \n{nbr_images} images processed in {total_time:.3f}s")
-    print(f"Repartition: {gmm_tools.proportions(clusters)}") 
+    print(f"Repartition: {resultat}") 
     
     image_to_clusters = dict(zip(list_img_names, list_clusters))
     

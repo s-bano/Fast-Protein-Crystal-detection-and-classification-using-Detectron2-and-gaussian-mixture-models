@@ -25,3 +25,4 @@ AI/image_0001.*
 *.h5
 Classification/archive
 dataset_classif_0812
+__pycache__
