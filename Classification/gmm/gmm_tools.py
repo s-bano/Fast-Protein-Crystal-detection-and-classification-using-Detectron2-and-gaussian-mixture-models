@@ -1,4 +1,4 @@
-import h5py, time, joblib, csv
+import h5py, time, joblib, csv, os
 import numpy as np
 from collections import Counter
 from sklearn.decomposition import PCA
@@ -157,7 +157,7 @@ def pipeline_training(h5_path, **kwargs):
 
 
 # Classifier un batch de features d'images (total_boxes, D)
-def classify_batch(features, scaler_path, model_path=STANDARD_MODEL):
+def classify_batch(features, model, scaler):
     """
         This function will classify each detected cristals from it
         
@@ -174,12 +174,8 @@ def classify_batch(features, scaler_path, model_path=STANDARD_MODEL):
     elif features.ndim == 1:
         features = features.reshape(1, -1)  # devient (1, 1024)
     
-    # Charger le scaler et le modèle
-    model = joblib.load(model_path)
-    scaler = joblib.load(scaler_path)
-    
     # Normalize data
-    X_scaled = scaler.fit_transform(features)
+    X_scaled = scaler.transform(features)
     
     # Predict clusters
     clusters = model.predict(X_scaled)
@@ -225,7 +221,9 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     X = np.concatenate(all_box_features, axis=0)
     
     start_time = time.time() 
-    clusters = classify_batch(X, scaler_path, model_path=model_path)
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+    clusters = classify_batch(X, model, scaler)
     total_time = time.time() - start_time
     
     # RErepartir les cristaux par images
@@ -249,5 +247,27 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     
     return image_to_clusters
     
+
+def filip_save(all_images_info):
+    """
+    This function starting from args will properly extract infos from it s path to correclt save it to xlsx according
+    to Filip demands
+    
+    Args:
+        all_images_info: list of image_info dicts
+            ex: image_info = {"name": img_path, "crystal_info": crystal_info, "image": out.get_image()}
+    """
+    
+    # Extraction des Filiparametres de l image
+    dossiers = os.path.dirname(all_images_info["name"]).split(os.sep)
+    
+    # CAS 1: Crystal Image
+    if 'crystal images' in dossiers:
+        pass
+        
+    
+    # CAS 2; Time image
+    else: 
+        pass
     
     

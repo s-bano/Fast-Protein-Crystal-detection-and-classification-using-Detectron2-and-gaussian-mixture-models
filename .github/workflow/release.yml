@@ -1,0 +1,37 @@
+name: Build and Release Package
+
+on:
+  release:
+    types: [created] # Se lance à chaque nouvelle release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Récupère ton code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Donne les permissions au script
+      - name: Make build script executable
+        run: chmod +x build_package.sh
+
+      # Exécute ton script
+      - name: Run build script
+        run: ./build_package.sh
+
+      # Uploade le dossier en tant qu’artefact (pratique pour debug/test)
+      - name: Upload dist_package as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist_package
+          path: dist_package/
+
+      # Ajoute le package dans les assets de la release
+      - name: Upload package to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist_package/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
