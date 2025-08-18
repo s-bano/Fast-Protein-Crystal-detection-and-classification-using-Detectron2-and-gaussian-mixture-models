@@ -1,9 +1,11 @@
-import h5py, time, joblib, sys, csv, os
+import h5py, time, joblib, csv
 import numpy as np
 from collections import Counter
 from sklearn.decomposition import PCA
-from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
+from sklearn.mixture import GaussianMixture
+from sklearn.pipeline import Pipeline
+
 
 STANDARD_MODEL = "model_classif_0812.pkl"
 STANDARD_SCALER = StandardScaler()
@@ -36,7 +38,10 @@ def extract_h5(h5_path):
 def proportions(lst):
     count = Counter(lst)
     total = len(lst)
-    return {"Cluster id " + str(int(k)): v / total for k, v in count.items()}
+    return {
+        "Cluster id " + str(int(k)): round((v / total) * 100, 2)
+        for k, v in count.items()
+    }
 
 
 # Conactene les box_features, normalize les donnees avec un scaler et applique une reudtcion PCA
@@ -67,12 +72,6 @@ def training(X_scaled, gmm_config, output_model_path="output_model.pkl"):
     end_time = time.time()
     total_time = end_time - start_time
     nbr_clusters_found = (gmm_config.weights_ > 1e-3).sum()  
-
-    # === Étape 5: Sauvegarde du modèle et du scaler ===
-    print('Saving model...')
-    joblib.dump(gmm_config, output_model_path)
-    # joblib.dump(scaler, out_scaler_path)
-
     
     returns = {
         'model': gmm_config,
@@ -84,25 +83,106 @@ def training(X_scaled, gmm_config, output_model_path="output_model.pkl"):
     return returns
 
 
+def pipeline_training(h5_path, **kwargs):
+    """
+        This function will perform a full pipeline training without any configuration
+        Usefull if you don't know what to do or for a first model
+        For advanced configured training, please check the tuto on the github page
+        
+        input:
+            h5_path: Path to the images features to train on
+            -- model_path: Path to the where the model should be saved
+            -- n_clusters: Number of clusters to find approximately
+            -- pca_dim: Number of dimensions the features will be reduct (PCA) (must be the same bteween training and processing)
+            -- sacler: The scaler used to normalize data before treatment (default: StandardScaler)
+            
+        output:
+            gmm_model: the gmm model trained
+    """
+    
+    output_model_path = kwargs.get("model_path", "model_classif.joblib")
+    output_scaler_path = kwargs.get("scaler_output", "scaler_classif.joblib")
+    n_clusters = kwargs.get("nbr_clusters", 4)
+    pca_dim = kwargs.get("pca_dim", PCA_DIM)
+    scaler = kwargs.get("scaler", STANDARD_SCALER)
 
-# Classifier un batch concatener de features d'images (total_boxes, D)
-def classify_batch(image_features, model_path=STANDARD_MODEL):
+    # === Étape 1: Charger tous les box_features ===
+    print("Extracting box features...")
+    all_box_features, _ = extract_h5(h5_path)
+
+    # === Étape 2: Normalisation ===
+    print("Data normalisation...")
+    X = np.concatenate(all_box_features, axis=0)
+    pipe = Pipeline([
+        ("scaler", scaler),
+        ("pca", PCA(n_components=pca_dim, svd_solver="auto", random_state=0)),
+    ])
+    X_scaled = pipe.fit_transform(X)
+
+
+    # === Étape 3: Configuration du modele GMM a entrainer ===
+    gmm = GaussianMixture(
+        n_components=n_clusters, 
+        covariance_type='full', 
+        reg_covar=1e-4, 
+        random_state=42)
+
+
+    # === Étape 4: Entrainement du modele ===
+    gmm_infos = training(X_scaled, gmm, output_model_path)
+
+
+    # === Étape 5: Analyse du model ===
+    gmm_model = gmm_infos['model']
+    ouptut_path = gmm_infos['model_path']
+    total_time = gmm_infos['training_time']
+    nbr_clusters_found = gmm_infos['nbr_clusters']
+    
+    # === Étape 6: Sauvegarde du modèle et du scaler ===
+    print('Saving model and scaler...')
+    joblib.dump(gmm_model, output_model_path)
+    joblib.dump(pipe, output_scaler_path)
+
+
+    print(f"✅ GMM model trained and saved here: {ouptut_path}")
+    print(f"✅ GMM scaler trained and saved here: {output_scaler_path}")
+    print(f"{nbr_clusters_found} clusters found in training_time {total_time:.3f}s)")
+    print("Cluster weights:", gmm_model.weights_)
+    print("Means shape:", gmm_model.means_.shape)
+    print("Covariances shape:", gmm_model.covariances_.shape)
+    
+    return gmm_model
+
+
+
+
+# Classifier un batch de features d'images (total_boxes, D)
+def classify_batch(features, scaler_path, model_path=STANDARD_MODEL):
     """
         This function will classify each detected cristals from it
         
         input:
-            image_features: numpy array shape (N, D)
+            features: numpy array shape (N, D)
             -- model_path: Path to the model to be used to classify
+            -- scaler_path: Path to the scaler to be used to normalize data beforehand
             
         output:
             clusters: list(int) List of class_id predicted
     """
-    if image_features.shape[0] == 0:
+    if features.shape[0] == 0:
         return np.array([])
+    elif features.ndim == 1:
+        features = features.reshape(1, -1)  # devient (1, 1024)
     
     # Charger le scaler et le modèle
     model = joblib.load(model_path)
-    clusters = model.predict(image_features)
+    scaler = joblib.load(scaler_path)
+    
+    # Normalize data
+    X_scaled = scaler.fit_transform(features)
+    
+    # Predict clusters
+    clusters = model.predict(X_scaled)
     
     return clusters
 
@@ -129,3 +209,45 @@ def clusters2csv(image_names, clusters, output_csv):
             for i in range(n_cristaux):                  
                 cristal_name = f"cristal{i+1}"             
                 writer.writerow([cristal_name, cluster[i]])
+                
+                
+                
+def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
+    
+    output_csv = kwargs.get("output_csv", "results_classif.csv")
+    
+    print("Openning file...")
+    all_box_features, image_names = extract_h5(h5_path)
+    
+    list_nbr_cristaux = [arr.shape[0] for arr in all_box_features]
+    nbr_images = len(image_names)
+    
+    X = np.concatenate(all_box_features, axis=0)
+    
+    start_time = time.time() 
+    clusters = classify_batch(X, scaler_path, model_path=model_path)
+    total_time = time.time() - start_time
+    
+    # RErepartir les cristaux par images
+    count = 0
+    list_clusters = []
+    for N_i in list_nbr_cristaux:
+        clusters_img = clusters[count:count+N_i]
+        list_clusters.append(clusters_img)
+        count = count+N_i
+        
+    # Enregistrement des clusters predits au format CSV
+    print("Saving predictions...")
+    clusters2csv(image_names, list_clusters, output_csv)
+    
+    # Affichage des statistiques
+    print(f"\n✅ Clusters saved successfully: {output_csv}")
+    print(f"   Classification summary: \n{nbr_images} images processed in {total_time:.3f}s")
+    print(f"Repartition: {proportions(clusters)}") 
+    
+    image_to_clusters = dict(zip(image_names, list_clusters))
+    
+    return image_to_clusters
+    
+    
+    

@@ -1,86 +1,22 @@
 """
 Usage : python gmm_processing.py <dataset_features.h5> [output_file] [model.pkl] [scaler.pkl]
 (Leave model and scaler empty if you want to use the default latest trained one by Raphaël Kuhn)
+
+Soon to be deprecated
+
 """
 
-import time, joblib, sys
-import numpy as np
-import gmm_tools
+import sys, gmm_tools
 
-
-
-def full_pipeline(h5_path, **kwargs):
-    
-    
-    output_path = kwargs.get("output_csv_path", "results_cluster.csv")
-    model_path = kwargs.get("model_path", gmm_tools.STANDARD_MODEL)
-    scaler = kwargs.get("scaler", gmm_tools.STANDARD_SCALER)
-    pca_dim = kwargs.get("pca_dim", gmm_tools.PCA_DIM)
-    
-    
-    # === Étape 1: Charger toutes les features ===
-    
-    print("Openning file...")
-    list_images_features, list_img_names = gmm_tools.extract_h5(h5_path)
-    
-    # Compter le nombre de cristaux par images avant la concatenation pour apres rerépartir les cristaux par images 
-    print("Counting nbr cristals per images...")
-    list_nbr_cristaux = [arr.shape[0] for arr in list_images_features]
-    nbr_images = len(list_img_names)
-    
-    
-    # === Étape 2: Passer les features dans le modele ===
-    
-    # Lancement du chronometre
-    start_time = time.time()                                        
-        
-    # Concatenation des features, pca et scaling
-    print("Normalizing features...")
-    X = gmm_tools.normalize(list_images_features, pca_dim, scaler)
-
-    # Prediction des clusters
-    print("Predicting clusters...")
-    clusters = gmm_tools.classify_batch(X, model_path)
-    print(clusters.shape)
-    
-    # Fin du chrono
-    total_time = time.time() - start_time
-    
-    
-    # RErepartir les cristaux par images
-    count = 0
-    list_clusters = []
-    for N_i in list_nbr_cristaux:
-        clusters_img = clusters[count:count+N_i]
-        list_clusters.append(clusters_img)
-        count = count+N_i
-
-    # Enregistrement des clusters predits au format CSV
-    print("Saving predictions...")
-    gmm_tools.clusters2csv(list_img_names, list_clusters, output_path)
-    
-    # Affichage des statistiques
-    print(f"\n✅ Clusters saved successfully: {output_path}")
-    print(f"   Classification summary: \n{nbr_images} images processed in {total_time:.3f}s")
-    print(f"Repartition: {gmm_tools.proportions(clusters)}") 
-    
-    image_to_clusters = dict(zip(list_img_names, list_clusters))
-    
-    return image_to_clusters
 
 
 
 if __name__ == "__main__":
     
-    if len(sys.argv) < 2:
-        print("Usage : python gmm_processing.py <dataset_features.h5> [output_file] [model.pkl] [scaler.pkl]")
+    if len(sys.argv) < 4:
+        print("Usage : python gmm_processing.py <dataset_features.h5> <model.joblib> <scaler.joblib> [output_csv_path]")
         print("(Leave model and scaler empty if you want to use the default latest trained one by Raphaël Kuhn)")
-    elif len(sys.argv) == 2:
-        full_pipeline(sys.argv[1])
-    elif len(sys.argv) == 3:
-        full_pipeline(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 4:
-        full_pipeline(sys.argv[1], sys.argv[2], sys.argv[3])    
+        gmm_tools.pipeline_process(sys.argv[1], sys.argv[2], sys.argv[3])    
     else:
-        scaler = joblib.load(sys.argv[4])
-        full_pipeline(sys.argv[1], sys.argv[2], sys.argv[3], scaler)
+        gmm_tools.pipeline_process(sys.argv[1], sys.argv[2], sys.argv[3], output_csv=sys.argv[4])
