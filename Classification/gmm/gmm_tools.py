@@ -47,7 +47,7 @@ def proportions(lst):
 
 
 # Conactene les box_features, normalize les donnees avec un scaler et applique une reudtcion PCA
-def normalize(list_images_features, pca_dim=PCA_DIM, scaler=STANDARD_SCALER):
+def _normalize(list_images_features, pca_dim=PCA_DIM, scaler=STANDARD_SCALER):
     
     X = np.concatenate(list_images_features, axis=0)  # shape (total_boxes, D)
     X_scaled = (scaler.fit_transform(X)).astype(np.float64)
@@ -127,7 +127,8 @@ def pipeline_training(h5_path, **kwargs):
         n_components=n_clusters, 
         covariance_type='full', 
         reg_covar=1e-4, 
-        random_state=42)
+        random_state=42
+    )
 
 
     # === Étape 4: Entrainement du modele ===
@@ -140,12 +141,14 @@ def pipeline_training(h5_path, **kwargs):
     total_time = gmm_infos['training_time']
     nbr_clusters_found = gmm_infos['nbr_clusters']
     
+    
     # === Étape 6: Sauvegarde du modèle et du scaler ===
     print('Saving model and scaler...')
     joblib.dump(gmm_model, output_model_path)
     joblib.dump(pipe, output_scaler_path)
 
 
+    # === Étape 7: Prints finaux d'infos utiles ===
     print(f"✅ GMM model trained and saved here: {ouptut_path}")
     print(f"✅ GMM scaler trained and saved here: {output_scaler_path}")
     print(f"{nbr_clusters_found} clusters found in training_time {total_time:.3f}s)")
@@ -188,7 +191,8 @@ def classify_batch(features, model, scaler):
 
 
 # Enregistrer les clusters dans un csv
-# NOTE: A changer pour combiner avec les csv fournis par le detecteur
+# NOTE: Soon to be deprecated as we will less do the features extraction and classification separtely
+#       See the colab notebook Detection&Classification
 def clusters2csv(image_names, clusters, output_csv):
     """
     Args:
@@ -209,7 +213,9 @@ def clusters2csv(image_names, clusters, output_csv):
                 writer.writerow([cristal_name, cluster[i]])
                 
                 
-                
+# full pipeline to classify images fetaures from a h5 file
+# NOTE: Soon to be deprecated as we will less do the features extraction and classification separtely
+#       See the colab notebook Detection&Classification              
 def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     
     output_csv = kwargs.get("output_csv", "results_classif.csv")
@@ -249,7 +255,9 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     
     return image_to_clusters
     
-    
+
+# All useful functions to save the cristals sizes, class etc.. in the way FIlip wants
+# Processing differenlty for crystal images and times images
 class Filip_Saver():
     """
     Args
@@ -333,10 +341,12 @@ def filip_save(all_images_info, root_dir, output_dir):
     saver = Filip_Saver(all_images_info, root_dir, output_dir)
     
     for path in root_dir.rglob('*'):
-        if path.is_dir() and path.name == "crystal images":
+        if not path.is_dir():
+            continue
+        if path.name == "crystal images":
             saver.gestion_crystal_images(path)
-        elif path.is_dir() and path.name == "time images":
-            pass
+        elif path.name == "time images":
+            saver.gestion_time_images(path)
 
         
     
