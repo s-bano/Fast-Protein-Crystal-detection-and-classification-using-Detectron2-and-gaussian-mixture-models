@@ -5,6 +5,8 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.mixture import GaussianMixture
 from sklearn.pipeline import Pipeline
+from pathlib import Path
+from openpyxl import Workbook
 
 
 STANDARD_MODEL = "model_classif_0812.pkl"
@@ -247,8 +249,76 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     
     return image_to_clusters
     
+    
+class Filip_Saver():
+    """
+    Args
+        all_images_info: Le dictionnaire d'infos de chaque image obtenu avec Detection&Classification
+        output_dir: Base folder in wich save the xlsx (Default .)
+    """
+    
+    def __init__(self, all_images_info, root_dir, output_dir='.'):
+        self.all_images_info = all_images_info
+        self.root_dir = root_dir
+        self.output_dir = output_dir
+    
+        
+    def gestion_crystal_images(self, crystal_folder):
+        """
+        Gere la creation d un fichier xlsx pour eregistrer les infos de cristaux d'images d etype 'crystal images'
+        Create a file for the folder of crystals images in input with:
+            1 tab per image 
+            
+        Args
+            crystal_folder: The input folder of crystals images to save
+            
+        Returns
+            None
+        """
+        
+        xlsx_path = self.output_dir + crystal_folder.name + ".xlsx"
+        
+        wb = Workbook()
+        ws = wb.active()
+        first_page = True
+            
+        list_files = crystal_folder.rglob('*')
+        for image_info in self.all_images_info:
+            if image_info["name"] in list_files:
+                
+                # Creatuion de la feuille avec le bon nom
+                if first_page:
+                    ws.title = image_info["name"]
+                else:
+                    ws = wb.create_sheet(image_info["name"])
+                    
+                # Enregistrement des infos dans le fichier
+                ws.append([image_info["name"]])
+                ws.append(["Cristal Id", "size (pixels²)", "size (µm²)", "Class"])
+                ws.append(image_info["crystal_info"])
+                
+        wb.save(xlsx_path)
+        print(f"✅ {xlsx_path} file (Crystal Image) created")
+        
+        return
+    
+    def gestion_time_images(self, time_folder):
+        """
+        Gere la creation d un fichier xlsx pour eregistrer les infos de cristaux d'images d etype 'time images'
+        
+            
+        Args
+            
+            
+        Returns
+            None
+        """
+        return
+        
+                
 
-def filip_save(all_images_info):
+
+def filip_save(all_images_info, root_dir, output_dir):
     """
     This function starting from args will properly extract infos from it s path to correclt save it to xlsx according
     to Filip demands
@@ -256,18 +326,18 @@ def filip_save(all_images_info):
     Args:
         all_images_info: list of image_info dicts
             ex: image_info = {"name": img_path, "crystal_info": crystal_info, "image": out.get_image()}
+        root_dir: The folder in its original structure to save data from
+        output_dir: output_dir: Base folder in wich recretae the structure of root_dir and save all xlsx files
     """
     
-    # Extraction des Filiparametres de l image
-    dossiers = os.path.dirname(all_images_info["name"]).split(os.sep)
+    saver = Filip_Saver(all_images_info, root_dir, output_dir)
     
-    # CAS 1: Crystal Image
-    if 'crystal images' in dossiers:
-        pass
+    for path in root_dir.rglob('*'):
+        if path.is_dir() and path.name == "crystal images":
+            saver.gestion_crystal_images(path)
+        elif path.is_dir() and path.name == "time images":
+            pass
+
         
-    
-    # CAS 2; Time image
-    else: 
-        pass
     
     
