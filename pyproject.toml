@@ -16,4 +16,5 @@ dependencies = [
     "torchvision",
     "scikit-learn",
     "h5py",
+    "openpyxl",
 ]

@@ -1,4 +1,4 @@
-import gmm_tools
+import export_tools
 import os, sys
 import numpy as np
 import pickle, random
@@ -39,7 +39,7 @@ def get_example(all_images_info):
     
 def test_imageInfo2arr(all_images_info):
     image_info = all_images_info[0]
-    arr = gmm_tools.image_info_to_arr(image_info)
+    arr = export_tools.image_info_to_arr(image_info)
     print(arr)
     
 
@@ -50,7 +50,7 @@ def test_concat_horizontal(all_images_info):
         arrays.append(all_images_info[i]["crystal_info"])
         
     try:
-        arr = gmm_tools.concat_horizontal(arrays)
+        arr = export_tools.concat_horizontal(arrays)
         if isinstance(arr[0][1], str) or isinstance(arr[0][2], str):
             print("FAIL: Variable is a string (str), but a float was expected.")
             return False
@@ -69,7 +69,7 @@ with open("all_info.pkl", "rb") as f:
     all_images_info = pickle.load(f)
 
 
-gmm_tools.filip_save(all_images_info, root_dir)
+export_tools.filip_save(all_images_info, root_dir)
 #test_imageInfo2arr(all_images_info)
 #get_example(all_images_info)
 #test_output_images(all_images_info)
