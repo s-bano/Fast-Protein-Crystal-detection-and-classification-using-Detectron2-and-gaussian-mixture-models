@@ -40,6 +40,34 @@ def split_path_at(path: str, folder: str) -> Tuple[Path, Path]:
     
     return before, after
 
+
+# This function concatenate a list of list into a list horizontaly
+# list of n (Ni, 4) lists into a (max(Ni), 4n)
+def concat_horizontal(arrays):
+    # arrays est une liste de listes de lignes (chaque "array" est une liste de listes)
+    
+    # Trouver le nombre maximal de lignes
+    maxN = max(len(arr) for arr in arrays)
+
+    # Normaliser la taille de chaque sous-array en ajoutant des ' ' à la fin
+    normalized_arrays = []
+    for arr in arrays:
+        n = len(arr)
+        m = len(arr[0]) if arr else 0  # nombre de colonnes (4 dans ton cas)
+        arr_extended = arr + [[' '] * m for _ in range(maxN - n)]
+        normalized_arrays.append(arr_extended)
+
+    # Concaténer horizontalement ligne par ligne
+    result = []
+    for row_idx in range(maxN):
+        row = []
+        for arr in normalized_arrays:
+            row.extend(arr[row_idx])
+        result.append(row)
+
+    return result
+
+
 # This function extracts the features from a h5 file
 def extract_h5(h5_path):
     """
@@ -279,13 +307,41 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     image_to_clusters = dict(zip(image_names, list_clusters))
     
     return image_to_clusters
+
+
+
+def image_info_to_arr(image_info, do_avg=False):
+    
+    array = []
+    
+    ligne1 = [image_info["name"], ' ', ' ', ' ']
+    ligne2 = ["Cristal Id", "size (pixels²)", "size (µm²)", "Class"]
+    
+    if do_avg:
+        # Creation de la ligne des moyennes
+        crystal_count = len(image_info["crystal_info"])
+        ligne_finale = ["AVG", f"=AVERAGE(B3:B{crystal_count+2})", f"=AVERAGE(C3:C{crystal_count+3})", " "]
+    else:
+        ligne_finale = [" ", " ", " ", " "]
+       
+    array = [ligne1, ligne2]  
+    
+    for row in image_info["crystal_info"]:
+        array.append(row) 
+    array.append(ligne_finale)
+     
+    return array
+        
     
 
+
 # A partir d image info creer un array numpy de bonne dimensions, pret a etre ecrit ou concatner dans un xlsx
-def image_info_to_arr(image_info):
+def image_info_to_arr_OLD(image_info, do_avg=False):
     
     ligne1 = np.array([image_info["name"], ' ', ' ', ' '])
     ligne2 = np.array(["Cristal Id", "size (pixels²)", "size (µm²)", "Class"])
+    
+    # Creation de l array des crystal info en respectant les formats
     crystal_arr = np.array(image_info["crystal_info"])
     
     # Creation de la ligne des moyennes
@@ -294,8 +350,10 @@ def image_info_to_arr(image_info):
     
     # Concatenation finale des lignes
     if not crystal_arr.size == 0:
-        #array = np.vstack([ligne1, ligne2, crystal_arr, ligne_finale])
-        array = np.vstack([ligne1, ligne2, crystal_arr])
+        if do_avg:
+            array = np.vstack([ligne1, ligne2, crystal_arr, ligne_finale])
+        else:
+            array = np.vstack([ligne1, ligne2, crystal_arr])
     else:
         empty_arr = np.array(['No cristals found', ' ', ' ', ' '])
         array = np.vstack([ligne1, ligne2, empty_arr])
@@ -365,7 +423,7 @@ class Filip_Saver():
                 # Enregistrement des infos dans le fichier
                 array = image_info_to_arr(image_info)
                 for row in array:
-                    ws.append(row.tolist())
+                    ws.append(row)
 
         # Enregistrement du fichier
         wb.save(xlsx_path)
@@ -389,20 +447,11 @@ class Filip_Saver():
                 arr = image_info_to_arr(image_info)
                 arrays.append(arr)
         
-        # Calculer le nombre maximal de lignes
-        maxN = max(arr.shape[0] for arr in arrays)
-
-        # Créer le tableau final horizontalement
-        result = np.full((maxN, 4 * len(arrays)), ' ', dtype=object)
-
-        # Copier chaque array dans le tableau final
-        for i, arr in enumerate(arrays):
-            N = arr.shape[0]
-            result[:N, i*4:(i+1)*4] = arr  # place chaque array dans sa "colonne" correspondante
+        result = concat_horizontal(arrays)
         
         # Ecrire le resultat dans le xlsx
         for row in result:
-            ws.append(row.tolist())
+            ws.append(row)
         
         return
     
