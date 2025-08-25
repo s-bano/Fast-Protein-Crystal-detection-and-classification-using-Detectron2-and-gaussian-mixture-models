@@ -5,7 +5,7 @@ python gmm_training.py features_train.h5
 
 import sys
 import gmm_tools
-
+from pathlib import Path
 
     
     

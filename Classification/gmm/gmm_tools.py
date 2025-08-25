@@ -7,6 +7,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.pipeline import Pipeline
 from pathlib import Path
 from openpyxl import Workbook
+from collections import defaultdict
 
 
 STANDARD_MODEL = "model_classif_0812.pkl"
@@ -265,10 +266,13 @@ class Filip_Saver():
         output_dir: Base folder in wich save the xlsx (Default .)
     """
     
-    def __init__(self, all_images_info, root_dir, output_dir='.'):
+    def __init__(self, all_images_info, root_dir, output_dir='output'):
         self.all_images_info = all_images_info
         self.root_dir = root_dir
-        self.output_dir = output_dir
+        self.output_dir = os.path.basename(root_dir) + "_output/"
+        
+        path = Path(self.output_dir)
+        path.mkdir(parents=True, exist_ok=True)
     
         
     def gestion_crystal_images(self, crystal_folder):
@@ -283,14 +287,23 @@ class Filip_Saver():
         Returns
             None
         """
+        print(self.root_dir)
+        parent = os.path.basename(os.path.dirname(crystal_folder))
+        filename = parent + ".xlsx"
         
-        xlsx_path = self.output_dir + crystal_folder.name + ".xlsx"
+        rel_path = os.path.relpath(crystal_folder, self.root_dir)
+        reduct_path = os.path.dirname(os.path.dirname(rel_path))
+        save_path = os.path.join(self.output_dir, reduct_path)
+        os.makedirs(save_path, exist_ok=True)
+
+        xlsx_path = os.path.join(save_path, filename)
         
         wb = Workbook()
-        ws = wb.active()
+        ws = wb.active
         first_page = True
-            
-        list_files = crystal_folder.rglob('*')
+        
+        root_dir = Path(crystal_folder)
+        list_files = root_dir.rglob('*')
         for image_info in self.all_images_info:
             if image_info["name"] in list_files:
                 
@@ -301,7 +314,7 @@ class Filip_Saver():
                     ws = wb.create_sheet(image_info["name"])
                     
                 # Enregistrement des infos dans le fichier
-                ws.append([image_info["name"]])
+                ws.append([image_info["name", "", "", ""]])
                 ws.append(["Cristal Id", "size (pixels²)", "size (µm²)", "Class"])
                 ws.append(image_info["crystal_info"])
                 
@@ -309,24 +322,87 @@ class Filip_Saver():
         print(f"✅ {xlsx_path} file (Crystal Image) created")
         
         return
+
     
-    def gestion_time_images(self, time_folder):
-        """
-        Gere la creation d un fichier xlsx pour eregistrer les infos de cristaux d'images d etype 'time images'
+    def gestion_tab_time(self, ws, time_folder_path):
         
-            
-        Args
-            
-            
-        Returns
-            None
-        """
+        print('Gestion:', time_folder_path)
+        
+        arrays = []
+        ligne1 = []
+        ligne2 = []
+        
+        # Récupérer toutes les images png/jpg/jpeg
+        root_dir = Path(time_folder_path)
+        list_files = list(root_dir.rglob("*.png")) + \
+                    list(root_dir.rglob("*.jpg")) + \
+                    list(root_dir.rglob("*.jpeg"))
+        print(list_files)
+        for image_info in self.all_images_info:
+            if image_info["name"] in list_files:
+                ligne1.extend(image_info["name"], ' ', ' ', ' ')
+                ligne2.extend("Cristal Id", "size (pixels²)", "size (µm²)", "Class")
+                crystal_arr = np.array(image_info["crystal_info"])
+                arrays.append(crystal_arr)
+        
+        
+        # Calculer la longueur maximale
+        maxN = max(arr.shape[0] for arr in arrays)
+
+        # Créer un tableau vide rempli de ' ' (dtype=object pour pouvoir stocker des strings)
+        result = np.full((maxN, 4), ' ', dtype=object)
+
+        # Copier chaque array dans le résultat
+        for i, arr in enumerate(arrays):
+            N = arr.shape[0]
+            result[:N, :] = arr  # remplit les N premières lignes
+        
+        
+        ws.append(ligne1)
+        ws.append(ligne2)
+        ws.append(result)
+        
+        
+        
         return
+    
+    
+    def gestion_time_images(self, grouped):
+        
+        for gp, files in grouped.items():
+            
+            print(f"{gp}:")
+            for f in files:
+                print(f"  - {f}")
+                
+            # Creer fichier xlsx avec nom grandparent
+            xlsx_path = self.output_dir + gp + ".xlsx"
+            wb = Workbook()
+            ws = wb.active
+            first_page = True
+            
+            # Creer tabs avec noms parents
+            for f in files:
+                
+                # Creatuion de la feuille avec le bon nom
+                parent_name = os.path.basename(os.path.dirname(f))
+                if first_page:
+                    ws.title = parent_name
+                else:
+                    ws = wb.create_sheet(parent_name)
+                
+                # Gestion tab pour chaque time_folder 
+                self.gestion_tab_time(ws, f)
+                
+            print(f"✅ {xlsx_path} file (Time Folder grand-parent) created")
+                
+        return
+    
         
                 
 
 
-def filip_save(all_images_info, root_dir, output_dir):
+def filip_save(all_images_info, root_dir, output_dir="."):
     """
     This function starting from args will properly extract infos from it s path to correclt save it to xlsx according
     to Filip demands
@@ -340,13 +416,26 @@ def filip_save(all_images_info, root_dir, output_dir):
     
     saver = Filip_Saver(all_images_info, root_dir, output_dir)
     
+    grouped = defaultdict(list)
+    root_dir = Path(root_dir)
+    
     for path in root_dir.rglob('*'):
         if not path.is_dir():
             continue
         if path.name == "crystal images":
             saver.gestion_crystal_images(path)
         elif path.name == "time images":
-            saver.gestion_time_images(path)
+            grandparent = os.path.basename(os.path.dirname(os.path.dirname(path)))
+            grouped[grandparent].append(path)
+            
+    # # Affichage
+    # for gp, files in grouped.items():
+    #     print(f"{gp}:")
+    #     for f in files:
+    #         print(f"  - {f}")
+            
+    saver.gestion_time_images(grouped)
+        
 
         
     
