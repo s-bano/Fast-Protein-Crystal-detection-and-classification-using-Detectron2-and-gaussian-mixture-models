@@ -302,22 +302,29 @@ class Filip_Saver():
         ws = wb.active
         first_page = True
         
-        root_dir = Path(crystal_folder)
-        list_files = root_dir.rglob('*')
+
+        list_files = list(Path(crystal_folder).rglob('*'))
         for image_info in self.all_images_info:
-            if image_info["name"] in list_files:
+            if any(os.path.basename(image_info["name"]) == p.name for p in list_files):
                 
-                # Creatuion de la feuille avec le bon nom
+                # Creation de la feuille avec le bon nom
                 if first_page:
-                    ws.title = image_info["name"]
+                    ws.title = os.path.basename(image_info["name"])
+                    first_page = False
                 else:
-                    ws = wb.create_sheet(image_info["name"])
+                    ws = wb.create_sheet(os.path.basename(image_info["name"]))
                     
                 # Enregistrement des infos dans le fichier
-                ws.append([image_info["name", "", "", ""]])
+                ws.append([image_info["name"], "", "", ""])
                 ws.append(["Cristal Id", "size (pixels²)", "size (µm²)", "Class"])
-                ws.append(image_info["crystal_info"])
-                
+                for crystal_count, row in enumerate(image_info["crystal_info"]):
+                    ws.append(row)
+
+                ws[f"A{crystal_count+4}"] = f"AVG"
+                ws[f"B{crystal_count+4}"] = f"=AVERAGE(B3:B{crystal_count+3})"
+                ws[f"C{crystal_count+4}"] = f"=AVERAGE(C3:C{crystal_count+3})"
+
+        # Enregistrement du fichier
         wb.save(xlsx_path)
         print(f"✅ {xlsx_path} file (Crystal Image) created")
         
@@ -433,7 +440,7 @@ def filip_save(all_images_info, root_dir, output_dir="."):
     #     print(f"{gp}:")
     #     for f in files:
     #         print(f"  - {f}")
-            
+    return
     saver.gestion_time_images(grouped)
         
 
