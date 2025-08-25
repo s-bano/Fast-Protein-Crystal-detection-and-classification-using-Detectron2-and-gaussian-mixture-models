@@ -41,13 +41,19 @@ def get_example(all_images_info):
     print(image_info["name"])
     crystal_arr = np.array(image_info['crystal_info'])
     print(crystal_arr.shape)
+    
+    
+def test_imageInfo2arr(all_images_info):
+    image_info = all_images_info[0]
+    arr = gmm_tools.image_info_to_arr(image_info)
+    print(arr)
 
 
 root_dir = '/Users/pagatok/Projets/Stage/database_build/crystal_images_filip'
+
+
 gmm_tools.filip_save(all_images_info, root_dir)
-
-
-
+#test_imageInfo2arr(all_images_info)
 #get_example(all_images_info)
 #test_output_images(all_images_info)
     
