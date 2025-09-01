@@ -165,6 +165,10 @@ def classify_batch(features, model, scaler):
     return clusters
 
 
+
+# ==========================DEPRECATED FUNCTIONS===================================
+
+
 # Enregistrer les clusters dans un csv
 # NOTE: DEPRECATED
 #       See crystalmetrics.export instead

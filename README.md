@@ -30,7 +30,7 @@ In the future, we aim to deploy this app so it can be run on local devices and a
 - Process an entire ZIP archive containing images (including nested folders).
 - Outputs a ZIP archive preserving the folder structure, with:
   - Images annotated with detected crystals.
-  - CSV files listing crystal sizes in pixels.
+  - XLSX files listing crystal sizes (in pixels and um) and predicted classes.
 
 ### How to use
 

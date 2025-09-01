@@ -2,8 +2,23 @@ from pathlib import Path
 from openpyxl import Workbook
 from collections import defaultdict
 from typing import Tuple
+from collections import Counter
 import numpy as np
 import os
+
+
+
+def getStats(all_images_infos):
+    clusters_all = []
+    for image_info in all_images_infos:
+        for crystal in image_info["crystal_info"]:
+            clusters_all.append(crystal[3])
+    count = Counter(clusters_all)
+    total = len(clusters_all)
+    return {
+        k: round((v / total) * 100, 2) 
+        for k, v in count.items()
+    }
 
 
 def split_path_at(path: str, folder: str) -> Tuple[Path, Path]:
@@ -81,35 +96,6 @@ def image_info_to_arr(image_info, do_avg=False):
      
     return array
         
-    
-
-
-# A partir d image info creer un array numpy de bonne dimensions, pret a etre ecrit ou concatner dans un xlsx
-def _image_info_to_arr_OLD(image_info, do_avg=False):
-    
-    ligne1 = np.array([image_info["name"], ' ', ' ', ' '])
-    ligne2 = np.array(["Cristal Id", "size (pixels²)", "size (µm²)", "Class"])
-    
-    # Creation de l array des crystal info en respectant les formats
-    crystal_arr = np.array(image_info["crystal_info"])
-    
-    # Creation de la ligne des moyennes
-    crystal_count = len(image_info["crystal_info"])
-    ligne_finale = np.array(["AVG", f"=AVERAGE(B3:B{crystal_count+2})", f"=AVERAGE(C3:C{crystal_count+3})", " "])
-    
-    # Concatenation finale des lignes
-    if not crystal_arr.size == 0:
-        if do_avg:
-            array = np.vstack([ligne1, ligne2, crystal_arr, ligne_finale])
-        else:
-            array = np.vstack([ligne1, ligne2, crystal_arr])
-    else:
-        empty_arr = np.array(['No cristals found', ' ', ' ', ' '])
-        array = np.vstack([ligne1, ligne2, empty_arr])
-    
-    return array
-    
- 
 
 # All useful functions to save the cristals sizes, class etc.. in the way FIlip wants
 # Processing differenlty for crystal images and times images
@@ -124,24 +110,17 @@ class Filip_Saver():
         self.all_images_info = all_images_info
         self.root_dir = root_dir
         self.output_dir = os.path.basename(root_dir) + "_output/"
+        self.crystal_files = 0
+        self.times_files = 0
         
         path = Path(self.output_dir)
         path.mkdir(parents=True, exist_ok=True)
     
-        
-    def gestion_crystal_images(self, crystal_folder):
-        """
-        Gere la creation d un fichier xlsx pour eregistrer les infos de cristaux d'images d etype 'crystal images'
-        Create a file for the folder of crystals images in input with:
-            1 tab per image 
-            
-        Args
-            crystal_folder: The input folder of crystals images to save
-            
-        Returns
-            None
-        """
 
+    # Updated version of gestion_crystal_images
+    def gestion_crystal_images(self, crystal_folder):
+        
+        # Creation du fichier excel
         parent = os.path.basename(os.path.dirname(crystal_folder))
         filename = (parent + "_crystal.xlsx")[-31:]
         
@@ -154,27 +133,24 @@ class Filip_Saver():
         
         wb = Workbook()
         ws = wb.active
-        first_page = True
         
-
+        # Parcours des images_infos concernes
+        arrays = []
         list_files = list(Path(crystal_folder).rglob('*'))
         for image_info in self.all_images_info:
             if any(os.path.basename(image_info["name"]) == p.name for p in list_files):
-                
-                # Creation de la feuille avec le bon nom
-                if first_page:
-                    ws.title = os.path.basename(image_info["name"])[:30]
-                    first_page = False
-                else:
-                    ws = wb.create_sheet(os.path.basename(image_info["name"])[:30])
-                    
-                # Enregistrement des infos dans le fichier
-                array = image_info_to_arr(image_info)
-                for row in array:
-                    ws.append(row)
-
-        # Enregistrement du fichier
+                arr = image_info_to_arr(image_info)
+                arrays.append(arr)
+        
+        result = concat_horizontal(arrays)
+        
+        # Ecrire le resultat dans le xlsx
+        for row in result:
+            ws.append(row)
+            
         wb.save(xlsx_path)
+        self.crystal_files += 1
+        print(f"Crystal images xlsx file created !: {xlsx_path}")
         
         return
     
@@ -237,8 +213,8 @@ class Filip_Saver():
                 self.gestion_tab_time(ws, f)
                 
             wb.save(xlsx_path)
-                
-            #print(f"✅ {xlsx_path} file (Time Folder grand-parent) created")
+            self.times_files += 1
+            print(f"Time images xlsx file created !: {xlsx_path}")
                 
         return
     
@@ -274,13 +250,14 @@ def filip_save(all_images_info, root_dir, output_dir="."):
             grandparent = os.path.basename(os.path.dirname(os.path.dirname(path)))
             grouped[grandparent].append(path)
             
-    #print(f"✅ {crystal_count} excel files for crystal images created")
-            
     # # Affichage
     # for gp, files in grouped.items():
     #     print(f"{gp}:")
     #     for f in files:
     #         print(f"  - {f}")
     saver.gestion_time_images(grouped)
-        
+    print("✅ Done !")
+    print(f"Total: {saver.crystal_files + saver.times_files} xlsx files created")
+    print(f"\t - {saver.crystal_files} crystal images files")
+    print(f"\t - {saver.times_files} time images files")
 

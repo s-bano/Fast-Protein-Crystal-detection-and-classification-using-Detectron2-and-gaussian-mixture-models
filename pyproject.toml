@@ -9,7 +9,6 @@ description = "Package python comportant des outils pour l'entrainement, l'utili
 authors = [{ name = "Raphaël Kuhn", email = "r.kuhn@rgu.ac.uk" }]
 dependencies = [
     "opencv-python",
-    "pytesseract",
     "numpy",
     "torch",
     "pillow",
