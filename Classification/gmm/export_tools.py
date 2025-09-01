@@ -143,15 +143,18 @@ class Filip_Saver():
         for image_info in self.all_images_info:
             if any(os.path.basename(image_info["name"]) == p.name for p in list_files):
                 
+                # Enregistrement de l'image de visualisation
+                if self.save_visual:
+                    image_path = os.path.join(self.output_dir, *os.path.normpath(image_info["name"]).split(os.sep)[2:])
+                    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                    plt.imsave(image_path, image_info["image"])
+                    self.images_created += 1
+                
                 # Extraction des infos et preparation pour ecriture dans fichier Excel
                 arr = image_info_to_arr(image_info)
                 arrays.append(arr)
                 
-                # Enregistrement de l'image de visualisation
-                if self.save_visual:
-                    os.makedirs(os.path.dirname(image_info["name"]), exist_ok=True)
-                    plt.imsave(image_info["name"], image_info["image"])
-                    self.images_created += 1
+                
         
         result = concat_horizontal(arrays)
         
@@ -180,15 +183,17 @@ class Filip_Saver():
         for image_info in self.all_images_info:
             if any(os.path.basename(image_info["name"]) == p.name for p in list_files):
                 
+                # Enregistrement de l'image de visualisation
+                if self.save_visual:
+                    image_path = os.path.join(self.output_dir, *os.path.normpath(image_info["name"]).split(os.sep)[2:])
+                    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+                    plt.imsave(image_path, image_info["image"])
+                    self.images_created += 1
+                
                 # Extraction des infos et preparation pour ecriture dans fichier Excel
                 arr = image_info_to_arr(image_info)
                 arrays.append(arr)
-                
-                # Enregistrement de l'image de visualisation
-                if self.save_visual:
-                    os.makedirs(os.path.dirname(image_info["name"]), exist_ok=True)
-                    plt.imsave(image_info["name"], image_info["image"])
-                    self.images_created += 1
+            
                 
         
         result = concat_horizontal(arrays)
