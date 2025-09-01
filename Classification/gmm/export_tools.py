@@ -3,6 +3,7 @@ from openpyxl import Workbook
 from collections import defaultdict
 from typing import Tuple
 from collections import Counter
+import matplotlib.pyplot as plt
 import numpy as np
 import os
 
@@ -106,12 +107,14 @@ class Filip_Saver():
         output_dir: Base folder in wich save the xlsx (Default .)
     """
     
-    def __init__(self, all_images_info, root_dir, output_dir='output'):
+    def __init__(self, all_images_info, root_dir, save_visual):
         self.all_images_info = all_images_info
         self.root_dir = root_dir
         self.output_dir = os.path.basename(root_dir) + "_output/"
         self.crystal_files = 0
         self.times_files = 0
+        self.images_created = 0
+        self.save_visual = save_visual
         
         path = Path(self.output_dir)
         path.mkdir(parents=True, exist_ok=True)
@@ -139,8 +142,16 @@ class Filip_Saver():
         list_files = list(Path(crystal_folder).rglob('*'))
         for image_info in self.all_images_info:
             if any(os.path.basename(image_info["name"]) == p.name for p in list_files):
+                
+                # Extraction des infos et preparation pour ecriture dans fichier Excel
                 arr = image_info_to_arr(image_info)
                 arrays.append(arr)
+                
+                # Enregistrement de l'image de visualisation
+                if self.save_visual:
+                    os.makedirs(os.path.dirname(image_info["name"]), exist_ok=True)
+                    plt.imsave(image_info["name"], image_info["image"])
+                    self.images_created += 1
         
         result = concat_horizontal(arrays)
         
@@ -150,7 +161,7 @@ class Filip_Saver():
             
         wb.save(xlsx_path)
         self.crystal_files += 1
-        print(f"Crystal images xlsx file created !: {xlsx_path}")
+        print(f"Crystal images xlsx file created: {xlsx_path}")
         
         return
     
@@ -168,8 +179,17 @@ class Filip_Saver():
         # Pour chaque image creer un array a concatener lui correspondant
         for image_info in self.all_images_info:
             if any(os.path.basename(image_info["name"]) == p.name for p in list_files):
+                
+                # Extraction des infos et preparation pour ecriture dans fichier Excel
                 arr = image_info_to_arr(image_info)
                 arrays.append(arr)
+                
+                # Enregistrement de l'image de visualisation
+                if self.save_visual:
+                    os.makedirs(os.path.dirname(image_info["name"]), exist_ok=True)
+                    plt.imsave(image_info["name"], image_info["image"])
+                    self.images_created += 1
+                
         
         result = concat_horizontal(arrays)
         
@@ -214,7 +234,7 @@ class Filip_Saver():
                 
             wb.save(xlsx_path)
             self.times_files += 1
-            print(f"Time images xlsx file created !: {xlsx_path}")
+            print(f"Time images xlsx file created: {xlsx_path}")
                 
         return
     
@@ -222,7 +242,7 @@ class Filip_Saver():
                 
 
 
-def filip_save(all_images_info, root_dir, output_dir="."):
+def filip_save(all_images_info, root_dir, save_visual=True):
     """
     This function starting from args will properly extract infos from it s path to correclt save it to xlsx according
     to Filip demands
@@ -231,10 +251,10 @@ def filip_save(all_images_info, root_dir, output_dir="."):
         all_images_info: list of image_info dicts
             ex: image_info = {"name": img_path, "crystal_info": crystal_info, "image": out.get_image()}
         root_dir: The folder in its original structure to save data from
-        output_dir: output_dir: Base folder in wich recretae the structure of root_dir and save all xlsx files
+        save_visual: Boolean to set to True for the visualisation images to be created
     """
     
-    saver = Filip_Saver(all_images_info, root_dir, output_dir)
+    saver = Filip_Saver(all_images_info, root_dir, save_visual)
     
     grouped = defaultdict(list)
     root_dir = Path(root_dir)
@@ -256,8 +276,11 @@ def filip_save(all_images_info, root_dir, output_dir="."):
     #     for f in files:
     #         print(f"  - {f}")
     saver.gestion_time_images(grouped)
+    
+    # Affichage du recap du nombre de fichiers crees par categories
     print("✅ Done !")
     print(f"Total: {saver.crystal_files + saver.times_files} xlsx files created")
-    print(f"\t - {saver.crystal_files} crystal images files")
-    print(f"\t - {saver.times_files} time images files")
+    print(f"\t - {saver.crystal_files} crystal images xlsx files")
+    print(f"\t - {saver.times_files} time images xlsxfiles")
+    print(f"Total: {saver.images_created} visualisation images saved")
 
