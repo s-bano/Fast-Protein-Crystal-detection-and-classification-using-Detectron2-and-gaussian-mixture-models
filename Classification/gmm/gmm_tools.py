@@ -44,7 +44,7 @@ def proportions(lst):
 
 
 # Train a GMM Classification model
-def training(X_scaled, gmm_config, output_model_path="output_model.pkl"):
+def training(X_scaled, gmm_config, output_model_path):
     
     print("GMM training...")
     start_time = time.time()

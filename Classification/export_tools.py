@@ -5,7 +5,8 @@ from typing import Tuple
 from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import os, zipfile
+import pandas as pd
 
 
 
@@ -20,6 +21,8 @@ def getStats(all_images_infos):
         k: round((v / total) * 100, 2) 
         for k, v in count.items()
     }
+    
+
 
 
 def split_path_at(path: str, folder: str) -> Tuple[Path, Path]:
@@ -51,6 +54,8 @@ def split_path_at(path: str, folder: str) -> Tuple[Path, Path]:
 # list of n (Ni, 4) lists into a (max(Ni), 4n)
 def concat_horizontal(arrays):
     # arrays est une liste de listes de lignes (chaque "array" est une liste de listes)
+    if len(arrays) == 0:
+        return []
     
     # Trouver le nombre maximal de lignes
     maxN = max(len(arr) for arr in arrays)
@@ -96,7 +101,7 @@ def image_info_to_arr(image_info, do_avg=False):
     array.append(ligne_finale)
      
     return array
-        
+      
 
 # All useful functions to save the cristals sizes, class etc.. in the way FIlip wants
 # Processing differenlty for crystal images and times images
@@ -210,10 +215,10 @@ class Filip_Saver():
         for gp, files in grouped.items():
                 
             # Creer fichier xlsx avec nom grandparent
-            if gp == "crystal_images_filip":
+            if gp == "crystal_images_filip" or gp == "content" or gp:
                 xlsx_path = os.path.join(self.output_dir, "control bubbles_time.xlsx")
             else:
-                filename = (gp + '_time.xlsx')[-30:]
+                filename = (gp + '_time.xlsx')
                 before, _ = split_path_at(files[0], gp)
                 _, after = split_path_at(before, os.path.basename(self.root_dir))
                 xlsx_path = os.path.join(self.output_dir, after, filename)
@@ -243,10 +248,8 @@ class Filip_Saver():
                 
         return
     
-        
-                
 
-
+# Interface d utilisation de la classe Filip_Saver    
 def filip_save(all_images_info, root_dir, save_visual=True):
     """
     This function starting from args will properly extract infos from it s path to correclt save it to xlsx according
@@ -289,3 +292,59 @@ def filip_save(all_images_info, root_dir, save_visual=True):
     print(f"\t - {saver.times_files} time images xlsxfiles")
     print(f"Total: {saver.images_created} visualisation images saved")
 
+
+# Gere l'exportation des resultats pour une seule image
+def single_save(image_info, output_dir="."):
+    
+    xlsx_path = os.path.join(output_dir, os.path.basename(image_info["name"]) + "_output.xlsx")
+    
+    wb = Workbook()
+    ws = wb.active
+    
+    # Enregistrement de l'image de visualisation
+    image_path = os.path.join(output_dir, os.path.basename(image_info["name"]) + "_output.jpg")
+    os.makedirs(os.path.dirname(image_path), exist_ok=True)
+    plt.imsave(image_path, image_info["image"])
+    
+    # Extraction des infos et preparation pour ecriture dans fichier Excel
+    arr = image_info_to_arr(image_info)
+
+    for row in arr:
+        ws.append(row)
+        
+    wb.save(xlsx_path)
+    print(f"Crystal images xlsx file created: {xlsx_path}")
+    
+    return xlsx_path, image_path
+
+
+def combine_xlsx(files, output_file="combined.xlsx"):
+    """
+    Combine plusieurs fichiers XLSX en un seul fichier XLSX avec plusieurs feuilles.
+    
+    Args:
+        files (list of str): chemins des fichiers XLSX à combiner
+        output_file (str): nom du fichier XLSX combiné à créer
+    """
+    with pd.ExcelWriter(output_file, engine='openpyxl') as writer:
+        for file_path in files:
+            # Lire la première feuille du fichier XLSX
+            df = pd.read_excel(file_path)
+            
+            # Utiliser le nom du fichier sans extension comme nom de feuille
+            sheet_name = file_path.split('/')[-1].replace('.xlsx','')[:31]  # Excel limite les noms de feuille à 31 caractères
+            
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+    
+    print(f"✅ Fichier combiné créé : {output_file}")
+    return output_file
+
+
+def zip_directory(folder_path, zip_name):
+    with zipfile.ZipFile(zip_name, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                # arcname = chemin relatif pour ne pas avoir tout le chemin absolu
+                arcname = os.path.relpath(file_path, start=folder_path)
+                zipf.write(file_path, arcname=arcname)

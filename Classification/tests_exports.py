@@ -69,8 +69,11 @@ with open("all_info.pkl", "rb") as f:
     all_images_info = pickle.load(f)
 
 
-export_tools.filip_save(all_images_info, root_dir)
+#export_tools.filip_save(all_images_info, root_dir)
 #test_imageInfo2arr(all_images_info)
 #get_example(all_images_info)
 #test_output_images(all_images_info)
 #test_concat_horizontal(all_images_info)
+
+image_info = all_images_info[0]
+export_tools.single_save(image_info)
