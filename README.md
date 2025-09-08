@@ -138,7 +138,5 @@ The long-term objective is to deploy crystal detection and classification direct
 ## 🚧 Roadmap
 
 - Validate the AI-enhanced measurement system through extensive testing.
-- Properly document the Google Colab scripts.
 - Export models and scripts to enable local execution.
-- Perform unsupervised classification of crystals.
 - Deploy the full pipeline in real-world protein crystallography experiments.
