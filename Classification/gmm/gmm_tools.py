@@ -95,8 +95,7 @@ def pipeline_training(h5_path, **kwargs):
     print("Data normalisation...")
     X = np.concatenate(all_box_features, axis=0)
     pipe = Pipeline([
-        ("scaler", scaler),
-        ("pca", PCA(n_components=pca_dim, svd_solver="auto", random_state=0)),
+        ("pca", PCA(n_components=pca_dim, svd_solver="auto", random_state=0))
     ])
     X_scaled = pipe.fit_transform(X)
 
@@ -166,35 +165,7 @@ def classify_batch(features, model, scaler):
 
 
 
-# ==========================DEPRECATED FUNCTIONS===================================
-
-
-# Enregistrer les clusters dans un csv
-# NOTE: DEPRECATED
-#       See crystalmetrics.export instead
-def clusters2csv(image_names, clusters, output_csv):
-    """
-    Args:
-        image_names: list of image names
-        all_box_features: list of np.arrays (N_i, D) per image
-        clusters_list_of_lists: list of lists of cristal indices per cluster
-        output_csv: output csv filepath
-    """
-
-    with open(output_csv, 'w', newline='') as f:
-        writer = csv.writer(f)
-        
-        for img_name, cluster in zip(image_names, clusters):
-            writer.writerow([img_name])
-            n_cristaux = cluster.shape[0]
-            for i in range(n_cristaux):                  
-                cristal_name = f"cristal{i+1}"             
-                writer.writerow([cristal_name, cluster[i]])
-
-
-# full pipeline to classify images fetaures from a h5 file
-# NOTE: DEPRECATED
-#       See the colab notebook Detection&Classification instead             
+# full pipeline to classify images fetaures from a h5 file           
 def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     
     output_csv = kwargs.get("output_csv", "results_classif.csv")
@@ -233,7 +204,34 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
     image_to_clusters = dict(zip(image_names, list_clusters))
     
     return image_to_clusters
+ 
+
+# ==========================DEPRECATED FUNCTIONS===================================
+
+
+# Enregistrer les clusters dans un csv
+# NOTE: DEPRECATED
+#       See crystalmetrics.export instead
+def clusters2csv(image_names, clusters, output_csv):
+    """
+    Args:
+        image_names: list of image names
+        all_box_features: list of np.arrays (N_i, D) per image
+        clusters_list_of_lists: list of lists of cristal indices per cluster
+        output_csv: output csv filepath
+    """
+
+    with open(output_csv, 'w', newline='') as f:
+        writer = csv.writer(f)
         
+        for img_name, cluster in zip(image_names, clusters):
+            writer.writerow([img_name])
+            n_cristaux = cluster.shape[0]
+            for i in range(n_cristaux):                  
+                cristal_name = f"cristal{i+1}"             
+                writer.writerow([cristal_name, cluster[i]])
+
+       
     
 # Conactene les box_features, normalize les donnees avec un scaler et applique une reudtcion PCA
 # NOTE: DEPRECATED
