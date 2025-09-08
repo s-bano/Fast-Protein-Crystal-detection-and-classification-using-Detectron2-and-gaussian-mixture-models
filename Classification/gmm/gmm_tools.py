@@ -64,6 +64,20 @@ def training(X_scaled, gmm_config, output_model_path):
     return returns
 
 
+
+def visualization_classes(h5_path):
+    
+    image_folder = "../database_build/images"
+    
+    all_box_features, images_names = extract_h5(h5_path)
+    print(images_names)
+
+
+
+
+
+
+
 def pipeline_training(h5_path, **kwargs):
     """
         This function will perform a full pipeline training without any configuration
