@@ -5,7 +5,7 @@ from typing import Tuple
 from collections import Counter
 import matplotlib.pyplot as plt
 import numpy as np
-import os, zipfile
+import os, zipfile, h5py
 import pandas as pd
 
 
@@ -348,3 +348,57 @@ def zip_directory(folder_path, zip_name):
                 # arcname = chemin relatif pour ne pas avoir tout le chemin absolu
                 arcname = os.path.relpath(file_path, start=folder_path)
                 zipf.write(file_path, arcname=arcname)
+                
+                
+            
+
+def split_h5(input_h5, output_train="features_train_0909.h5", output_val="features_val_0909.h5", train_ratio=0.7, seed=42):
+    """
+    Split an H5 file into two subsets (train/val) by splitting crystal entries.
+    
+    Parameters
+    ----------
+    input_h5 : str
+        Path to the input H5 file.
+    output_train : str
+        Path to the output H5 file for the training set.
+    output_val : str
+        Path to the output H5 file for the validation set.
+    train_ratio : float
+        Proportion of crystals to put in the training set (default: 0.7).
+    seed : int
+        Random seed for reproducibility.
+    """
+    rng = np.random.default_rng(seed)
+
+    with h5py.File(input_h5, "r") as f:
+        # Ouvrir les fichiers de sortie
+        with h5py.File(output_train, "w") as f_train, h5py.File(output_val, "w") as f_val:
+            
+            for img_name in f.keys():
+                group = f[img_name]
+
+                global_features = group["global_features"][:]
+                box_features = group["box_features"][:]   # (N, D)
+                boxes = group["boxes"][:]                 # (N, 4)
+
+                n = box_features.shape[0]
+                idx = np.arange(n)
+                rng.shuffle(idx)
+
+                n_train = int(train_ratio * n)
+                train_idx, val_idx = idx[:n_train], idx[n_train:]
+
+                # Train group
+                g_train = f_train.create_group(img_name)
+                g_train.create_dataset("global_features", data=global_features)
+                g_train.create_dataset("box_features", data=box_features[train_idx])
+                g_train.create_dataset("boxes", data=boxes[train_idx])
+
+                # Val group
+                g_val = f_val.create_group(img_name)
+                g_val.create_dataset("global_features", data=global_features)
+                g_val.create_dataset("box_features", data=box_features[val_idx])
+                g_val.create_dataset("boxes", data=boxes[val_idx])
+
+    print(f"✅ Done! Training set saved to {output_train}, Validation set saved to {output_val}")

@@ -19,6 +19,7 @@ FILES_SCRIPT=(
     "./Classification/export_tools.py"
     "./Classification/gmm/gmm_tools.py"
     "./AI/detectron_tools.py"
+    "./Classification/h5_tools.py"
     "./build/__init__.py"
 )
 

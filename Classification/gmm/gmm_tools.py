@@ -28,7 +28,7 @@ def extract_h5(h5_path):
             box_feats = f[img_name]["box_features"][:]  # shape (N, D)
             all_box_features.append(box_feats)
             image_names.append(img_name)
-            
+    
     
     return all_box_features, image_names
 
@@ -65,16 +65,79 @@ def training(X_scaled, gmm_config, output_model_path):
 
 
 
-def visualization_classes(h5_path):
+def visualization_classes(h5_path, model, scaler):
     
     image_folder = "../database_build/images"
     
     all_box_features, images_names = extract_h5(h5_path)
+    
+    for i in range(len(all_box_features)):
+        image_features = all_box_features[i]
+        image_path = os.path.join(image_folder, images_names[i])
+        
+        print(type(image_features))
+        print(image_features.shape)
+        sys.exit()
+        
+        clusters = classify_batch(image_features, model, scaler)
+    
     print(images_names)
 
 
+def new_pipeline_training(box_features_list, **kwargs):
+
+    output_model_path = kwargs.get("model_path", "model_classif.joblib")
+    output_scaler_path = kwargs.get("scaler_output", "scaler_classif.joblib")
+    n_clusters = kwargs.get("nbr_clusters", 4)
+    pca_dim = kwargs.get("pca_dim", PCA_DIM)
+    scaler = kwargs.get("scaler", STANDARD_SCALER)
 
 
+
+    # === Étape 2: Normalisation ===
+    print("Data normalisation...")
+    X = np.concatenate(box_features_list, axis=0)
+    pipe = Pipeline([
+        ("pca", PCA(n_components=pca_dim, svd_solver="auto", random_state=0))
+    ])
+    X_scaled = pipe.fit_transform(X)
+
+
+    # === Étape 3: Configuration du modele GMM a entrainer ===
+    gmm = GaussianMixture(
+        n_components=n_clusters, 
+        covariance_type='full', 
+        reg_covar=1e-4, 
+        random_state=42
+    )
+
+
+    # === Étape 4: Entrainement du modele ===
+    gmm_infos = training(X_scaled, gmm, output_model_path)
+
+
+    # === Étape 5: Analyse du model ===
+    gmm_model = gmm_infos['model']
+    ouptut_path = gmm_infos['model_path']
+    total_time = gmm_infos['training_time']
+    nbr_clusters_found = gmm_infos['nbr_clusters']
+    
+    
+    # === Étape 6: Sauvegarde du modèle et du scaler ===
+    print('Saving model and scaler...')
+    joblib.dump(gmm_model, output_model_path)
+    joblib.dump(pipe, output_scaler_path)
+
+
+    # === Étape 7: Prints finaux d'infos utiles ===
+    print(f"✅ GMM model trained and saved here: {ouptut_path}")
+    print(f"✅ GMM scaler trained and saved here: {output_scaler_path}")
+    print(f"{nbr_clusters_found} clusters found in training_time {total_time:.3f}s)")
+    print("Cluster weights:", gmm_model.weights_)
+    print("Means shape:", gmm_model.means_.shape)
+    print("Covariances shape:", gmm_model.covariances_.shape)
+    
+    return gmm_model
 
 
 
@@ -178,17 +241,15 @@ def classify_batch(features, model, scaler):
     return clusters
 
 
-
+# NOTE: Deprecated
 # full pipeline to classify images fetaures from a h5 file           
-def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
+def pipeline_process(all_box_features, img_paths, model_path, scaler_path, **kwargs):
     
     output_csv = kwargs.get("output_csv", "results_classif.csv")
     
-    print("Openning file...")
-    all_box_features, image_names = extract_h5(h5_path)
     
     list_nbr_cristaux = [arr.shape[0] for arr in all_box_features]
-    nbr_images = len(image_names)
+    nbr_images = len(img_paths)
     
     X = np.concatenate(all_box_features, axis=0)
     
@@ -208,14 +269,14 @@ def pipeline_process(h5_path, model_path, scaler_path, **kwargs):
         
     # Enregistrement des clusters predits au format CSV
     print("Saving predictions...")
-    clusters2csv(image_names, list_clusters, output_csv)
+    clusters2csv(img_paths, list_clusters, output_csv)
     
     # Affichage des statistiques
     print(f"\n✅ Clusters saved successfully: {output_csv}")
     print(f"   Classification summary: \n{nbr_images} images processed in {total_time:.3f}s")
     print(f"Repartition: {proportions(clusters)}") 
     
-    image_to_clusters = dict(zip(image_names, list_clusters))
+    image_to_clusters = dict(zip(img_paths, list_clusters))
     
     return image_to_clusters
  
