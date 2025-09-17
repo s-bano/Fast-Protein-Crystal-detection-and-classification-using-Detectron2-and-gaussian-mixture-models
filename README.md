@@ -24,6 +24,8 @@ The specific objectives of the project are:
 
 We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.
 
+> You can check the video tutorial [here](https://youtu.be/Q-XzCx8v-h8)
+
 ### Features
 
 - Process an entire ZIP archive containing images (including nested folders) or single images.
@@ -60,7 +62,7 @@ To simply run the crystal detection on a set of images, please go [here](#runnin
 
 ### Train on Google Colab
 
-1. Open the [Colab notebook](insert_link).
+1. Open the [Colab notebook](https://colab.research.google.com/drive/1BVv4seAGRw9qVKoPWAsBJ_uWEBzY9U14?usp=sharing).
 2. Make a **copy** of the notebook to your own Google Drive.
 3. Upload your dataset ZIP archive.
    > [Here]() is the link to the latest dataset built by us.
