@@ -22,25 +22,21 @@ The specific objectives of the project are:
 
 ## 💾 Running Crystal Detection with Google Colab
 
-We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.  
-In the future, we aim to deploy this app so it can be run on local devices and after that on microfluidic devices (Go [here](#deployment) for more infos)
+We provide a ready-to-use **Google Colab notebook** to run the crystal detection and segmentation model on your image dataset without local setup.
 
 ### Features
 
-- Process an entire ZIP archive containing images (including nested folders).
+- Process an entire ZIP archive containing images (including nested folders) or single images.
+- Features a graphical web environment
 - Outputs a ZIP archive preserving the folder structure, with:
   - Images annotated with detected crystals.
   - XLSX files listing crystal sizes (in pixels and um) and predicted classes.
 
 ### How to use
 
-1. Open the [Colab notebook](https://colab.research.google.com/drive/1SlUv-KsLp-mUdxJQZ1cdwdg4xdY7QlKu?usp=sharing).
-2. Make a **copy** of the notebook to your own Google Drive.
-3. Upload your images ZIP archive and your `.pth` model file.
-   > [Here](https://liverguac-my.sharepoint.com/:f:/g/personal/r_kuhn_rgu_ac_uk/Eqou7erMVKBNpnR7u5lhXRQBeREYnuNjxXD12QRsb1UFqg?e=Pv7mB7) is the link to the latest model trained by us.  
-   > If you want to train your own model, please go to [Crystal Detection Training](#crystal-detection-training)
-4. Edit the example paths in the notebook to match your files.
-5. Run all cells (`Runtime > Run all`) to process your images.
+1. Open the [Colab notebook](https://colab.research.google.com/drive/1SlUv-KsLp-mUdxJQZ1cdwdg4xdY7QlKu?usp=sharing).2
+2. Run all cells (`Runtime > Run all`) to launche the graphica environment (It may take a while since it's also downloading resources).
+3. Upload your images or ZIP files and click `Run`
 
 ---
 
@@ -71,10 +67,6 @@ To simply run the crystal detection on a set of images, please go [here](#runnin
 4. Edit the example paths in the notebook to match your files.
 5. Run the designated cells
 6. (Optionnal) Evaluate the performances of your newly trained model or export it using the dedicated section in the colab notebook
-
-### Train on local device
-
-Not supported yet...
 
 ---
 
@@ -117,26 +109,30 @@ All the scripts required for this section are located in the `database_build` fo
 
 ---
 
-## 🔬 Crystal Classification (WIP)
+## 🔬 Crystal Classification with Guassian Model Mixture
 
 The goal of this section is to **perform unsupervised classification of detected crystals** by extracting meaningful visual features.
 
-This involves analyzing the segmented crystals and grouping them into different classes **without prior labeling**, using techniques such as clustering or dimensionality reduction based on extracted descriptors.
+This involves analyzing the segmented crystals and grouping them into different classes **without prior labeling**, using techniques such as clustering or dimensionality reduction based on extracted descriptors. A GMM model is already used by the Crystal Detection Colab Notebook.
 
----
+### Train a GMM model
 
-## 🧪 Deployment
+1. Extract features using this google Colab notebook into a `h5` format
+2. To get a new `gmm_model`, use
+   ```bash
+   python gmm_training.py features.h5
+   ```
 
-This section focuses on **integrating AI models with microfluidic devices to enable automated, real-time crystal measurement**.
+## AICM Python Package
 
-The first step is to run the crystal detection script on local devices. Currently, running the script requires Detectron2, which can be challenging to install. Therefore, the immediate goal is to export the trained Detectron2 model to TorchScript for easier deployment.
+The Google Colab Notebook use a custom python package called AICM containing the detectron2 and GMM models and scripts containing usefull functions.
+It is automaticaly downloaded in the Colab Notebook
 
-The long-term objective is to deploy crystal detection and classification directly on microfluidic devices, which will bring additional challenges to address.
+### Build
 
----
+If you want to build a new AICM package, you can specify the path to the files you want to include in `build_package.sh` and then launch it with:
 
-## 🚧 Roadmap
-
-- Validate the AI-enhanced measurement system through extensive testing.
-- Export models and scripts to enable local execution.
-- Deploy the full pipeline in real-world protein crystallography experiments.
+```bash
+chmod u+x build_package.sh
+./build_package.sh
+```
