@@ -13,11 +13,6 @@ The specific objectives of the project are:
 - **Optimization**: To optimize the AI algorithms for better performance and adaptability to different types of protein crystals.
 - **Validation**: To validate the AI-enhanced measurement system through extensive testing and application in actual protein crystallography experiments. -->
 
-## 📝 Basic Requirements
-
-- Python >= 3.12 - Needed for everything from dataset creation to process images.
-- Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
-
 ---
 
 ## 💾 Running Crystal Detection with Google Colab
@@ -43,6 +38,11 @@ We provide a ready-to-use **Google Colab notebook** to run the crystal detection
 ---
 
 ## 📝 Crystal Detection Training
+
+### 📝 Basic Requirements
+
+- Python >= 3.12 - Needed for everything from dataset creation to process images.
+- Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
 
 This section is only if you want to train your own Detectron2 model for crystal detection and segmentation.
 To simply run the crystal detection on a set of images, please go [here](#running-crystal-detection-with-google-colab)
