@@ -39,6 +39,8 @@ We provide a ready-to-use **Google Colab notebook** to run the crystal detection
 
 ## 📝 Crystal Detection Training
 
+[here](https://drive.google.com/file/d/1hAQAWmmDCPmKggARMJYlSXfMqIOfNMTI/view?usp=sharing) is the link to the orginal dataset of non-labelized images.
+
 ### Requirements
 
 - Python >= 3.12 - Needed for everything from dataset creation to process images.
