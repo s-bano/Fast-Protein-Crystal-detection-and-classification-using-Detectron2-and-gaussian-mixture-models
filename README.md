@@ -31,7 +31,7 @@ We provide a ready-to-use **Google Colab notebook** to run the crystal detection
 
 ### How to use
 
-1. Open the [Colab notebook](https://colab.research.google.com/drive/1SlUv-KsLp-mUdxJQZ1cdwdg4xdY7QlKu?usp=sharing).2
+1. Open the [Colab notebook](https://colab.research.google.com/drive/1SlUv-KsLp-mUdxJQZ1cdwdg4xdY7QlKu?usp=sharing)
 2. Run all cells (`Runtime > Run all`) to launche the graphica environment (It may take a while since it's also downloading resources).
 3. Upload your images or ZIP files and click `Run`
 
