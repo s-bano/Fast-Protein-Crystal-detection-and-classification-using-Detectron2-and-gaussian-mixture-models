@@ -39,15 +39,13 @@ We provide a ready-to-use **Google Colab notebook** to run the crystal detection
 
 ## 📝 Crystal Detection Training
 
-### 📝 Basic Requirements
+### Requirements
 
 - Python >= 3.12 - Needed for everything from dataset creation to process images.
 - Preferably being on an UNIX based OS as this project hasn't been tested on Windows yet and some dataset building programes may not work correctly on it.
 
 This section is only if you want to train your own Detectron2 model for crystal detection and segmentation.
 To simply run the crystal detection on a set of images, please go [here](#running-crystal-detection-with-google-colab)
-
-### Requirements
 
 - A dataset of labeled crystal images (COCO format)
 
